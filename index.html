@@ -1,0 +1,948 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Patente B - Master App</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* --- STILE VISIVO (CSS) --- */
+        :root {
+            --primary: #2563EB; --primary-light: #EFF6FF;
+            --success: #10B981; --error: #EF4444;
+            --text-main: #1F2937; --text-sec: #6B7280;
+            --bg: #F3F4F6; --surface: #ffffff;
+            --info-bg: #E0F2FE; --info-text: #0369A1;
+        }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text-main); margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 15px; }
+        
+        .app-shell { background: var(--surface); width: 100%; max-width: 480px; height: 90vh; border-radius: 24px; box-shadow: 0 20px 40px -5px rgba(0,0,0,0.1); overflow: hidden; display: flex; flex-direction: column; position: relative; }
+
+        /* HEADER */
+        .header { padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; background: white; border-bottom: 1px solid #F3F4F6; z-index: 10; height: 70px; flex-shrink: 0; }
+        .brand { font-weight: 800; font-size: 18px; color: var(--primary); letter-spacing: -0.5px; }
+        .home-btn { background: #F3F4F6; border: none; font-size: 18px; cursor: pointer; padding: 0; border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
+        .home-btn:hover { background: #E5E7EB; }
+
+        /* VIEWS */
+        .view { flex: 1; padding: 20px; overflow-y: auto; display: none; flex-direction: column; animation: fadeIn 0.3s ease; }
+        .view.active { display: flex; }
+
+        /* HOME DASHBOARD */
+        .stats-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
+        .stat-box { background: #F9FAFB; padding: 15px; border-radius: 12px; text-align: center; border: 1px solid #E5E7EB; }
+        .stat-num { font-size: 22px; font-weight: 700; color: var(--primary); display: block; }
+        .stat-label { font-size: 10px; color: var(--text-sec); text-transform: uppercase; margin-top: 4px; font-weight: 600; }
+
+        .history-container { margin-bottom: 25px; background: white; padding: 10px; border-radius: 12px; border: 1px solid #E5E7EB; display: flex; flex-direction: column; align-items: center; }
+        .history-label { font-size: 11px; color: var(--text-sec); text-transform: uppercase; margin-bottom: 8px; letter-spacing: 1px; }
+        .history-dots { display: flex; gap: 8px; }
+        .dot { width: 12px; height: 12px; border-radius: 50%; background-color: #E5E7EB; transition: 0.3s; }
+        .dot.pass { background-color: var(--success); box-shadow: 0 2px 4px rgba(16, 185, 129, 0.3); }
+        .dot.fail { background-color: var(--error); box-shadow: 0 2px 4px rgba(239, 68, 68, 0.3); }
+
+        /* CARDS */
+        .mode-card { border: 2px solid #E5E7EB; border-radius: 16px; padding: 18px; text-align: left; cursor: pointer; margin-bottom: 12px; transition: 0.2s; display: flex; align-items: center; gap: 15px; position: relative; }
+        .mode-card:hover { border-color: var(--primary); background: var(--primary-light); }
+        .mode-icon { font-size: 24px; background: white; width: 45px; height: 45px; display: flex; align-items: center; justify-content: center; border-radius: 12px; border: 1px solid #eee; }
+        .mode-card.disabled { opacity: 0.5; pointer-events: none; filter: grayscale(1); }
+        .err-badge { position: absolute; right: 15px; top: 15px; background: var(--error); color: white; font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 10px; }
+
+        /* QUIZ HEADER & TIMER */
+        .quiz-header { display: flex; justify-content: space-between; align-items: center; font-size: 13px; color: var(--text-sec); margin-bottom: 10px; font-weight: 500; height: 30px; }
+        
+        .timer-box { font-family: 'Courier New', monospace; font-weight: 700; font-size: 16px; color: var(--text-main); background: #F3F4F6; padding: 4px 10px; border-radius: 6px; display: none; }
+        .timer-box.urgent { color: var(--error); background: #FEE2E2; animation: pulse 1s infinite; }
+        
+        .end-btn { font-size: 12px; font-weight: 600; color: var(--error); background: #FEF2F2; padding: 6px 12px; border-radius: 20px; border: 1px solid #FEE2E2; cursor: pointer; display: none; }
+        .end-btn:hover { background: #FECACA; border-color: var(--error); }
+
+        .progress-bar { height: 6px; background: #E5E7EB; border-radius: 3px; margin-bottom: 20px; overflow: hidden; opacity: 1; transition: opacity 0.3s; }
+        .progress-fill { height: 100%; background: var(--primary); width: 0%; transition: width 0.3s; }
+        
+        /* QUIZ CONTENT */
+        .image-box { width: 100%; height: 180px; background: #fff; border: 1px solid #E5E7EB; border-radius: 16px; margin-bottom: 20px; display: flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0; }
+        .image-box img { width: 100%; height: 100%; object-fit: contain; }
+        
+        .question { font-size: 18px; font-weight: 600; line-height: 1.5; margin-bottom: 25px; flex: 1; color: var(--text-main); overflow-y: auto; }
+        
+        .btn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: auto; flex-shrink: 0; }
+        .ans-btn { padding: 18px; border-radius: 14px; border: 2px solid #E5E7EB; background: white; font-weight: 700; font-size: 16px; cursor: pointer; transition: 0.1s; color: var(--text-main); }
+        .ans-btn:active { transform: scale(0.98); }
+        .ans-btn.selected-true { background: #ECFDF5; border-color: var(--success); color: var(--success); }
+        .ans-btn.selected-false { background: #FEF2F2; border-color: var(--error); color: var(--error); }
+        .ans-btn.dimmed { opacity: 0.4; pointer-events: none; }
+
+        .explanation { background: var(--info-bg); color: var(--info-text); padding: 15px; border-radius: 12px; margin-top: 15px; font-size: 14px; line-height: 1.4; border-left: 4px solid #0EA5E9; display: none; animation: slideUp 0.3s; }
+        .next-btn { background: var(--text-main); color: white; border: none; padding: 16px; border-radius: 14px; width: 100%; font-weight: 600; margin-top: 15px; cursor: pointer; display: none; font-size: 16px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+
+        /* RESULTS */
+        .res-circle { width: 140px; height: 140px; border-radius: 50%; background: #E5E7EB; margin: 0 auto 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; border: 5px solid white; box-shadow: 0 10px 20px rgba(0,0,0,0.05); }
+        .res-score { font-size: 42px; font-weight: 800; color: var(--text-main); line-height: 1; }
+        .res-label { font-size: 12px; color: var(--text-sec); text-transform: uppercase; margin-top: 5px; font-weight: 600; }
+        
+        .chapter-grid { display: grid; grid-template-columns: 1fr; gap: 10px; }
+        .chapter-card { background: white; border: 1px solid #E5E7EB; padding: 15px; border-radius: 12px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: 0.2s; }
+        .chapter-card:hover { border-color: var(--primary); background: var(--primary-light); }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { transform: translateY(10px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+        .hidden { display: none !important; }
+    </style>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#2563EB">
+<link rel="apple-touch-icon" href="icon.png">
+
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('sw.js');
+    });
+  }
+</script>
+</head>
+<body>
+
+<div class="app-shell">
+    
+    <div class="header">
+        <button class="home-btn" onclick="goHome()" title="Home">🏠</button>
+        <div class="brand">Guida<span style="color:#2563EB">Facile</span></div>
+        <div style="width: 40px;"></div>
+    </div>
+
+    <div id="view-home" class="view active">
+        <h1 style="font-size: 22px; margin-bottom: 5px; margin-top: 0;">Ciao!</h1>
+        <p style="color: var(--text-sec); margin-bottom: 20px; font-size: 14px;">Ecco come stai andando.</p>
+
+        <div class="stats-row">
+            <div class="stat-box">
+                <span class="stat-num" id="stat-total">0</span>
+                <span class="stat-label">Esami Totali</span>
+            </div>
+            <div class="stat-box">
+                <span class="stat-num" id="stat-passed" style="color: var(--success);">0</span>
+                <span class="stat-label">Esami Idonei</span>
+            </div>
+        </div>
+
+        <div class="history-container">
+            <div class="history-label">Storico Ultimi 5 Esami</div>
+            <div class="history-dots" id="history-dots">
+                <div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div>
+            </div>
+        </div>
+
+        <h3 style="font-size: 13px; text-transform: uppercase; color: var(--text-sec); margin-bottom: 10px; letter-spacing: 1px;">Scegli Attività</h3>
+
+        <div class="mode-card" onclick="startSession('sim')">
+            <div class="mode-icon" style="color: var(--primary);">⏱️</div>
+            <div>
+                <div style="font-weight: 700; font-size: 16px;">Simulazione Esame</div>
+                <div style="font-size: 13px; color: var(--text-sec);">30 Quiz • Timer 30 min • No aiuti</div>
+            </div>
+        </div>
+
+        <div class="mode-card" onclick="goToChapters()">
+            <div class="mode-icon" style="color: #F59E0B;">🎓</div>
+            <div>
+                <div style="font-weight: 700; font-size: 16px;">Studio per Argomento</div>
+                <div style="font-size: 13px; color: var(--text-sec);">Scegli Categoria • Stop libero</div>
+            </div>
+        </div>
+
+        <div class="mode-card" id="card-review" onclick="startSession('review')">
+            <div class="err-badge" id="err-count-badge">0</div>
+            <div class="mode-icon" style="color: var(--error);">❤️‍🩹</div>
+            <div>
+                <div style="font-weight: 700; font-size: 16px;">Ripasso Errori</div>
+                <div style="font-size: 13px; color: var(--text-sec);">Rivedi i quiz sbagliati</div>
+            </div>
+        </div>
+        
+        <div style="text-align: center; margin-top: 20px;">
+             <button onclick="resetData()" style="background:none; border:none; color:#ccc; font-size:11px; cursor:pointer;">Reset Dati</button>
+        </div>
+    </div>
+
+    <div id="view-chapters" class="view">
+        <h2 style="margin-top: 0; font-size: 20px;">Argomenti Studio</h2>
+        <p style="color:var(--text-sec); font-size:14px; margin-bottom:20px;">Seleziona un argomento per esercitarti.</p>
+        <div id="chapters-list" class="chapter-grid"></div>
+    </div>
+
+    <div id="view-quiz" class="view">
+        <div class="quiz-header">
+            <span id="quiz-mode-label" style="text-transform: uppercase; font-weight: 700; color: var(--primary); font-size:12px; max-width: 50%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">SIMULAZIONE</span>
+            <div class="timer-box" id="timer-display">30:00</div>
+            <button class="end-btn" id="btn-end-session" onclick="endSession()">Termina</button>
+            <span id="quiz-counter">1 / 30</span>
+        </div>
+        <div class="progress-bar" id="progress-container"><div class="progress-fill" id="progress"></div></div>
+
+        <div class="image-box" id="img-box"></div>
+        <div class="question" id="q-text">Caricamento...</div>
+
+        <div class="btn-grid" id="ans-area">
+            <button class="ans-btn" onclick="submitAnswer(true)">Vero</button>
+            <button class="ans-btn" onclick="submitAnswer(false)">Falso</button>
+        </div>
+
+        <div class="explanation" id="expl-box">
+            <strong style="display:block; margin-bottom:5px;">Spiegazione:</strong>
+            <span id="expl-text">...</span>
+        </div>
+
+        <button class="next-btn" id="btn-next" onclick="nextQuestion()">Prossima ➜</button>
+    </div>
+
+    <div id="view-result" class="view" style="text-align: center;">
+        <h2 style="margin-bottom: 30px; margin-top: 10px;">Risultato</h2>
+        <div class="res-circle" id="res-circle-bg">
+            <span class="res-score" id="res-score-val">--</span>
+            <span class="res-label" id="res-score-label">Errori</span>
+        </div>
+        <h3 id="res-msg" style="font-size: 20px; margin: 15px 0;">...</h3>
+        <p id="res-sub" style="color: var(--text-sec); font-size: 14px; margin-bottom: 40px; padding: 0 20px;">...</p>
+        <button class="next-btn" style="display: block; background: var(--primary);" onclick="goHome()">Torna alla Home</button>
+    </div>
+
+</div>
+
+<script>
+    const db = [
+        /* --- CATEGORIA 1: VEICOLI --- */
+        { id: 101, text: "I veicoli a due ruote con motore termico fino a 50 cm3 e velocità massima di 45 km/h sono ciclomotori", vero: true, fig: null, cat: "veicoli", expl: "Esatto. Se superano questi limiti vengono classificati come motocicli." },
+        { id: 102, text: "I ciclomotori possono avere due o tre ruote", vero: true, fig: null, cat: "veicoli", expl: "Vero. Esistono anche i ciclomotori a tre ruote e i quadricicli leggeri (4 ruote)." },
+        { id: 103, text: "I ciclomotori non sono soggetti a revisione periodica", vero: false, fig: null, cat: "veicoli", expl: "Falso. Devono essere revisionati dopo 4 anni dalla prima immatricolazione e poi ogni 2 anni." },
+        { id: 104, text: "Si definiscono motocicli solo i veicoli a due ruote di cilindrata fino a 125 cm3", vero: false, fig: null, cat: "veicoli", expl: "Falso. I motocicli sono veicoli a due ruote con cilindrata superiore a 50 cm3." },
+        { id: 105, text: "Tutti i veicoli a motore con tre ruote sono dei motocicli", vero: false, fig: null, cat: "veicoli", expl: "Falso. Esistono i tricicli a motore e i ciclomotori a tre ruote." },
+        { id: 106, text: "I quadricicli leggeri, ai fini della circolazione, sono assimilati ai ciclomotori", vero: true, fig: null, cat: "veicoli", expl: "Vero. Si possono guidare con la patente AM." },
+        { id: 107, text: "La guida dei quadricicli non leggeri è consentita già al compimento del 14° anno di età", vero: false, fig: null, cat: "veicoli", expl: "Falso. Per i quadricicli non leggeri serve la patente B1 (16 anni)." },
+        { id: 108, text: "L'autovettura è un veicolo destinato al trasporto di massimo nove persone, compreso il conducente", vero: true, fig: null, cat: "veicoli", expl: "Vero. Oltre i 9 posti si parla di autobus." },
+        { id: 109, text: "L'autobus non è un'autovettura", vero: true, fig: null, cat: "veicoli", expl: "Vero. Sono due categorie diverse." },
+        { id: 110, text: "Le autovetture sono soggette a revisione ogni cinque anni", vero: false, fig: null, cat: "veicoli", expl: "Falso. 4 anni dopo la prima immatricolazione, poi ogni 2 anni." },
+        { id: 111, text: "Le autocaravan (camper) sono veicoli attrezzati permanentemente per il trasporto e l'alloggio di persone", vero: true, fig: null, cat: "veicoli", expl: "Vero." },
+        { id: 112, text: "Sulle autocaravan è possibile viaggiare in piedi, solo per brevi tratti", vero: false, fig: null, cat: "veicoli", expl: "Falso. Tutti seduti e con cinture." },
+        { id: 113, text: "I rimorchi leggeri sono quelli di massa massima a pieno carico fino a 750 kg", vero: true, fig: null, cat: "veicoli", expl: "Corretto." },
+        { id: 114, text: "I caravan (roulotte) sono rimorchi attrezzati per essere adibiti ad alloggio", vero: true, fig: null, cat: "veicoli", expl: "Vero. Solo a veicolo fermo." },
+        { id: 115, text: "È possibile alloggiare nei caravan (roulotte) durante la circolazione", vero: false, fig: null, cat: "veicoli", expl: "Falso. È vietato." },
+        { id: 116, text: "La strada può essere suddivisa in carreggiate", vero: true, fig: null, cat: "veicoli", expl: "Vero." },
+        { id: 117, text: "La strada non comprende i marciapiedi", vero: false, fig: null, cat: "veicoli", expl: "Falso. Comprende tutto." },
+        { id: 118, text: "L'autostrada non ha incroci a raso", vero: true, fig: null, cat: "veicoli", expl: "Vero." },
+        { id: 119, text: "Nelle autostrade possono circolare tutti i tipi di motocicli", vero: false, fig: null, cat: "veicoli", expl: "Falso. Solo quelli >= 150 cm3." },
+        { id: 120, text: "Le strade extraurbane principali sono a carreggiate separate", vero: true, fig: null, cat: "veicoli", expl: "Vero." },
+        { id: 121, text: "La carreggiata è destinata alla circolazione dei veicoli", vero: true, fig: null, cat: "veicoli", expl: "Vero." },
+        { id: 122, text: "Fanno parte della carreggiata le corsie di emergenza", vero: false, fig: null, cat: "veicoli", expl: "Falso." },
+        { id: 123, text: "La corsia può essere destinata alla normale marcia dei veicoli", vero: true, fig: null, cat: "veicoli", expl: "Vero." },
+        { id: 124, text: "La corsia è formata da due carreggiate", vero: false, fig: null, cat: "veicoli", expl: "Falso." },
+        { id: 125, text: "La corsia di accelerazione serve ad entrare in autostrada", vero: true, fig: null, cat: "veicoli", expl: "Vero." },
+        { id: 126, text: "La corsia di decelerazione può essere utilizzata per la sosta", vero: false, fig: null, cat: "veicoli", expl: "Falso." },
+        { id: 127, text: "La banchina è parte della strada posta al di fuori della carreggiata", vero: true, fig: null, cat: "veicoli", expl: "Vero." },
+        { id: 128, text: "La banchina divide la carreggiata in due corsie", vero: false, fig: null, cat: "veicoli", expl: "Falso." },
+        { id: 129, text: "Il marciapiede è riservato ai pedoni", vero: true, fig: null, cat: "veicoli", expl: "Vero." },
+        { id: 130, text: "Il marciapiede è una parte della carreggiata", vero: false, fig: null, cat: "veicoli", expl: "Falso." },
+        { id: 131, text: "Il passo carrabile consente l'accesso alle proprietà laterali", vero: true, fig: null, cat: "veicoli", expl: "Vero." },
+        { id: 132, text: "In corrispondenza del passo carrabile è consentita la sosta", vero: false, fig: null, cat: "veicoli", expl: "Falso. Solo la fermata breve." },
+        { id: 133, text: "L'attraversamento pedonale è vietato al transito dei veicoli", vero: false, fig: null, cat: "veicoli", expl: "Falso. Si può transitare dando precedenza." },
+        { id: 134, text: "L'attraversamento pedonale è segnalato con strisce bianche", vero: true, fig: null, cat: "veicoli", expl: "Vero." },
+        { id: 135, text: "L'intersezione a raso è un incrocio allo stesso livello", vero: true, fig: null, cat: "veicoli", expl: "Vero." },
+        { id: 136, text: "L'intersezione a livelli sfalsati comprende sovrappassi o sottopassi", vero: true, fig: null, cat: "veicoli", expl: "Vero." },
+        { id: 137, text: "Il passaggio a livello è un'intersezione a livelli sfalsati", vero: false, fig: null, cat: "veicoli", expl: "Falso." },
+        { id: 138, text: "L'isola di traffico facilita l'incanalamento dei veicoli", vero: true, fig: null, cat: "veicoli", expl: "Vero." },
+        { id: 139, text: "Sull'isola di traffico è consentito il transito dei motocicli", vero: false, fig: null, cat: "veicoli", expl: "Falso." },
+        { id: 140, text: "L'isola di traffico viene evidenziata mediante zebrature bianche", vero: true, fig: null, cat: "veicoli", expl: "Vero." },
+        { id: 141, text: "In una ZTL possono circolare solo i veicoli autorizzati", vero: true, fig: null, cat: "veicoli", expl: "Vero." },
+        { id: 142, text: "Una ZTL è sempre vietata al transito dei veicoli a motore", vero: false, fig: null, cat: "veicoli", expl: "Falso." },
+        { id: 143, text: "Nelle aree pedonali possono transitare i veicoli per disabili", vero: true, fig: null, cat: "veicoli", expl: "Vero." },
+        { id: 144, text: "Nelle aree pedonali possono transitare tutti i motocicli a velocità ridotta", vero: false, fig: null, cat: "veicoli", expl: "Falso." },
+        { id: 145, text: "Il salvagente facilita la salita/discesa dai mezzi pubblici", vero: true, fig: null, cat: "veicoli", expl: "Vero." },
+        { id: 146, text: "Il salvagente serve a dividere i sensi di marcia", vero: false, fig: null, cat: "veicoli", expl: "Falso." },
+        { id: 147, text: "La corrente di traffico è l'insieme dei veicoli nello stesso senso di marcia", vero: true, fig: null, cat: "veicoli", expl: "Vero." },
+        { id: 148, text: "La sede tranviaria è sempre parte della carreggiata", vero: false, fig: null, cat: "veicoli", expl: "Falso." },
+        { id: 149, text: "L'autostrada deve essere lateralmente recintata", vero: true, fig: null, cat: "veicoli", expl: "Vero." },
+        { id: 150, text: "Le macchine operatrici possono circolare in autostrada", vero: false, fig: null, cat: "veicoli", expl: "Falso." },
+
+        /* --- CATEGORIA 2: PERICOLO --- */
+        { id: 201, text: "Il segnale raffigurato preannuncia un tratto di strada deformata", vero: true, fig: 1, cat: "pericolo", expl: "Indica pavimentazione irregolare." },
+        { id: 202, text: "Il segnale raffigurato preannuncia una discesa pericolosa", vero: false, fig: 1, cat: "pericolo", expl: "Falso. È strada deformata." },
+        { id: 203, text: "In presenza del segnale è necessario moderare la velocità", vero: true, fig: 1, cat: "pericolo", expl: "Per non perdere il controllo." },
+        { id: 204, text: "Il segnale raffigurato preannuncia un dosso", vero: true, fig: 2, cat: "pericolo", expl: "Salita seguita da discesa." },
+        { id: 205, text: "Il segnale raffigurato preannuncia una cunetta", vero: false, fig: 2, cat: "pericolo", expl: "Falso." },
+        { id: 206, text: "È vietato il sorpasso sul tratto in salita del dosso", vero: true, fig: 2, cat: "pericolo", expl: "Vero, manca visibilità." },
+        { id: 207, text: "Il segnale raffigurato preannuncia una cunetta", vero: true, fig: 3, cat: "pericolo", expl: "Discesa seguita da salita." },
+        { id: 208, text: "Il segnale raffigurato preannuncia una banchina cedevole", vero: false, fig: 3, cat: "pericolo", expl: "Falso." },
+        { id: 209, text: "Il segnale raffigurato preannuncia una curva pericolosa a destra", vero: true, fig: 4, cat: "pericolo", expl: "Moderare la velocità." },
+        { id: 210, text: "Il segnale raffigurato preannuncia una curva pericolosa a sinistra", vero: true, fig: 5, cat: "pericolo", expl: "Vero." },
+        { id: 211, text: "Il segnale raffigurato preannuncia una doppia curva, la prima a destra", vero: true, fig: 6, cat: "pericolo", expl: "Vero." },
+        { id: 212, text: "Il segnale raffigurato preannuncia una doppia curva, la prima a sinistra", vero: true, fig: 7, cat: "pericolo", expl: "Vero." },
+        { id: 213, text: "Il segnale raffigurato preannuncia una deviazione per lavori", vero: false, fig: 6, cat: "pericolo", expl: "Falso." },
+        { id: 214, text: "Il segnale raffigurato preannuncia un passaggio a livello con barriere", vero: true, fig: 8, cat: "pericolo", expl: "Simbolo staccionata." },
+        { id: 215, text: "Il segnale raffigurato preannuncia un passaggio a livello senza barriere", vero: true, fig: 9, cat: "pericolo", expl: "Simbolo locomotiva." },
+        { id: 216, text: "Il segnale Croce di S. Andrea è posto vicino ai binari", vero: true, fig: 10, cat: "pericolo", expl: "Indica binario unico." },
+        { id: 217, text: "Il segnale Doppia Croce indica più binari", vero: true, fig: 11, cat: "pericolo", expl: "Vero." },
+        { id: 218, text: "I pannelli distanziometrici si trovano solo prima dei passaggi senza barriere", vero: false, fig: 13, cat: "pericolo", expl: "Falso. Si trovano prima di tutti i PL." },
+        { id: 219, text: "Il segnale raffigurato preannuncia un attraversamento tranviario", vero: true, fig: 14, cat: "pericolo", expl: "Vero." },
+        { id: 220, text: "Il segnale raffigurato preannuncia una linea aerea ad alta tensione", vero: false, fig: 14, cat: "pericolo", expl: "Falso." },
+        { id: 221, text: "Il segnale raffigurato preannuncia un attraversamento pedonale", vero: true, fig: 15, cat: "pericolo", expl: "Dare precedenza ai pedoni." },
+        { id: 222, text: "È vietato sorpassare veicoli fermi per far passare i pedoni", vero: true, fig: 15, cat: "pericolo", expl: "Vero." },
+        { id: 223, text: "Il segnale raffigurato preannuncia un attraversamento ciclabile", vero: true, fig: 16, cat: "pericolo", expl: "Vero." },
+        { id: 224, text: "Il segnale raffigurato preannuncia una discesa pericolosa", vero: true, fig: 17, cat: "pericolo", expl: "Vero." },
+        { id: 225, text: "Il segnale raffigurato preannuncia una salita ripida", vero: true, fig: 18, cat: "pericolo", expl: "Vero." },
+        { id: 226, text: "In discesa bisogna marciare con la frizione abbassata", vero: false, fig: 17, cat: "pericolo", expl: "Falso. Mai." },
+        { id: 227, text: "Il segnale raffigurato preannuncia una strettoia simmetrica", vero: true, fig: 19, cat: "pericolo", expl: "Vero." },
+        { id: 228, text: "Il segnale raffigurato preannuncia una strettoia a sinistra", vero: true, fig: 20, cat: "pericolo", expl: "Vero." },
+        { id: 229, text: "Il segnale raffigurato preannuncia una strettoia a destra", vero: true, fig: 21, cat: "pericolo", expl: "Vero." },
+        { id: 230, text: "Il segnale raffigurato preannuncia un ponte mobile", vero: true, fig: 22, cat: "pericolo", expl: "Vero." },
+        { id: 231, text: "Il segnale raffigurato preannuncia una banchina cedevole", vero: true, fig: 23, cat: "pericolo", expl: "Vero." },
+        { id: 232, text: "Il segnale raffigurato preannuncia strada sdrucciolevole", vero: true, fig: 24, cat: "pericolo", expl: "Vero." },
+        { id: 233, text: "Il segnale raffigurato preannuncia bambini", vero: true, fig: 25, cat: "pericolo", expl: "Vero." },
+        { id: 234, text: "Il segnale raffigurato preannuncia animali domestici", vero: true, fig: 26, cat: "pericolo", expl: "Vero." },
+        { id: 235, text: "Il segnale raffigurato preannuncia animali selvatici", vero: true, fig: 27, cat: "pericolo", expl: "Vero." },
+        { id: 236, text: "Il segnale raffigurato preannuncia doppio senso di circolazione", vero: true, fig: 28, cat: "pericolo", expl: "Vero." },
+        { id: 237, text: "Il segnale raffigurato preannuncia circolazione rotatoria", vero: true, fig: 29, cat: "pericolo", expl: "Vero." },
+        { id: 238, text: "Il segnale raffigurato preannuncia sbocco su molo", vero: true, fig: 30, cat: "pericolo", expl: "Vero." },
+        { id: 239, text: "Il segnale raffigurato preannuncia pietrisco", vero: true, fig: 31, cat: "pericolo", expl: "Vero." },
+        { id: 240, text: "Il segnale raffigurato preannuncia caduta massi da sinistra", vero: true, fig: 32, cat: "pericolo", expl: "Vero." },
+        { id: 241, text: "Il segnale raffigurato preannuncia caduta massi da destra", vero: true, fig: 33, cat: "pericolo", expl: "Vero." },
+        { id: 242, text: "Il segnale raffigurato preannuncia semaforo", vero: true, fig: 34, cat: "pericolo", expl: "Vero." },
+        { id: 243, text: "Il segnale raffigurato preannuncia aeromobili", vero: true, fig: 36, cat: "pericolo", expl: "Vero." },
+        { id: 244, text: "Il segnale raffigurato preannuncia forte vento laterale", vero: true, fig: 37, cat: "pericolo", expl: "Vero." },
+        { id: 245, text: "Il segnale raffigurato preannuncia pericolo incendio", vero: true, fig: 38, cat: "pericolo", expl: "Vero." },
+        { id: 246, text: "Il segnale raffigurato preannuncia un pericolo generico", vero: true, fig: 39, cat: "pericolo", expl: "Vero." },
+        { id: 247, text: "Il segnale raffigurato si usa senza pannelli", vero: false, fig: 39, cat: "pericolo", expl: "Falso." },
+        { id: 248, text: "Il segnale di strettoia preannuncia sempre senso unico alternato", vero: false, fig: 19, cat: "pericolo", expl: "Falso." },
+        { id: 249, text: "Il segnale di doppio senso si trova alla fine del senso unico", vero: true, fig: 28, cat: "pericolo", expl: "Vero." },
+        { id: 250, text: "In presenza del segnale di attraversamento pedonale è obbligatorio suonare", vero: false, fig: 15, cat: "pericolo", expl: "Falso." },
+
+        /* --- CATEGORIA 3: PRECEDENZA --- */
+        { id: 301, text: "Il segnale raffigurato è un segnale di precedenza", vero: true, fig: 40, cat: "precedenza", expl: "Vero." },
+        { id: 302, text: "Il segnale raffigurato obbliga a dare precedenza a destra e sinistra", vero: true, fig: 40, cat: "precedenza", expl: "Vero." },
+        { id: 303, text: "Il segnale raffigurato obbliga sempre a fermarsi", vero: false, fig: 40, cat: "precedenza", expl: "Falso. Solo se necessario." },
+        { id: 304, text: "Il segnale raffigurato si trova sulle corsie di accelerazione", vero: true, fig: 40, cat: "precedenza", expl: "Vero." },
+        { id: 305, text: "Il segnale raffigurato è posto a 150 metri", vero: false, fig: 40, cat: "precedenza", expl: "Falso. È all'incrocio." },
+        { id: 306, text: "Il segnale raffigurato (STOP) obbliga a fermarsi alla striscia", vero: true, fig: 41, cat: "precedenza", expl: "Vero." },
+        { id: 307, text: "Il segnale STOP impone di arrestarsi e dare precedenza", vero: true, fig: 41, cat: "precedenza", expl: "Vero." },
+        { id: 308, text: "Il segnale STOP obbliga ad arrestarsi solo se ci sono veicoli", vero: false, fig: 41, cat: "precedenza", expl: "Falso. Sempre." },
+        { id: 309, text: "Il segnale STOP si trova negli incroci con scarsa visibilità", vero: true, fig: 41, cat: "precedenza", expl: "Vero." },
+        { id: 310, text: "Il segnale STOP è un segnale di pericolo", vero: false, fig: 41, cat: "precedenza", expl: "Falso. Prescrizione." },
+        { id: 311, text: "Il segnale raffigurato preannuncia un DARE PRECEDENZA", vero: true, fig: 42, cat: "precedenza", expl: "Vero." },
+        { id: 312, text: "Il segnale raffigurato indica la distanza dall'incrocio", vero: true, fig: 42, cat: "precedenza", expl: "Vero." },
+        { id: 313, text: "Il segnale raffigurato è un preavviso di STOP", vero: false, fig: 42, cat: "precedenza", expl: "Falso." },
+        { id: 314, text: "Il segnale raffigurato preannuncia uno STOP a 320 metri", vero: true, fig: 43, cat: "precedenza", expl: "Vero." },
+        { id: 315, text: "Il segnale raffigurato obbliga ad arrestarsi subito", vero: false, fig: 43, cat: "precedenza", expl: "Falso. È un preavviso." },
+        { id: 316, text: "Il segnale raffigurato invita a rallentare", vero: true, fig: 43, cat: "precedenza", expl: "Vero." },
+        { id: 317, text: "Il segnale raffigurato preannuncia incrocio con precedenza a destra", vero: true, fig: 44, cat: "precedenza", expl: "Vero." },
+        { id: 318, text: "Il segnale raffigurato preannuncia incrocio con precedenza", vero: false, fig: 44, cat: "precedenza", expl: "Falso." },
+        { id: 319, text: "In presenza del segnale bisogna moderare la velocità", vero: true, fig: 44, cat: "precedenza", expl: "Vero." },
+        { id: 320, text: "Il segnale raffigurato impone di dare precedenza nel senso unico alternato", vero: true, fig: 45, cat: "precedenza", expl: "Vero." },
+        { id: 321, text: "Il segnale raffigurato si trova in una strada a senso unico", vero: false, fig: 45, cat: "precedenza", expl: "Falso." },
+        { id: 322, text: "Il segnale raffigurato impone di dare precedenza a chi viene di fronte", vero: true, fig: 45, cat: "precedenza", expl: "Vero." },
+        { id: 323, text: "Il segnale raffigurato indica fine diritto di precedenza", vero: true, fig: 46, cat: "precedenza", expl: "Vero." },
+        { id: 324, text: "Il segnale raffigurato indica fine senso unico", vero: false, fig: 46, cat: "precedenza", expl: "Falso." },
+        { id: 325, text: "Il segnale raffigurato invita a prudenza", vero: true, fig: 46, cat: "precedenza", expl: "Vero." },
+        { id: 326, text: "Il segnale raffigurato preannuncia incrocio con diritto di precedenza", vero: true, fig: 47, cat: "precedenza", expl: "Vero." },
+        { id: 327, text: "Il segnale raffigurato preannuncia incrocio con strade minori", vero: true, fig: 47, cat: "precedenza", expl: "Vero." },
+        { id: 328, text: "Non occorre rallentare", vero: false, fig: 47, cat: "precedenza", expl: "Falso." },
+        { id: 329, text: "Il segnale raffigurato preannuncia incrocio a destra secondario", vero: true, fig: 48, cat: "precedenza", expl: "Vero." },
+        { id: 330, text: "Il segnale raffigurato vieta la svolta a destra", vero: false, fig: 48, cat: "precedenza", expl: "Falso." },
+        { id: 331, text: "Il segnale raffigurato preannuncia incrocio a sinistra secondario", vero: true, fig: 49, cat: "precedenza", expl: "Vero." },
+        { id: 332, text: "Il segnale raffigurato preannuncia strada senza uscita", vero: false, fig: 49, cat: "precedenza", expl: "Falso." },
+        { id: 333, text: "Il segnale raffigurato preannuncia confluenza a destra", vero: true, fig: 50, cat: "precedenza", expl: "Vero." },
+        { id: 334, text: "Il segnale raffigurato obbliga a dare precedenza a destra", vero: false, fig: 50, cat: "precedenza", expl: "Falso. Abbiamo noi la precedenza." },
+        { id: 335, text: "Il segnale raffigurato invita alla massima prudenza", vero: true, fig: 50, cat: "precedenza", expl: "Vero." },
+        { id: 336, text: "Il segnale raffigurato preannuncia confluenza a sinistra", vero: true, fig: 51, cat: "precedenza", expl: "Vero." },
+        { id: 337, text: "Il segnale raffigurato si trova su strade a senso unico", vero: true, fig: 51, cat: "precedenza", expl: "Vero." },
+        { id: 338, text: "Il segnale raffigurato indica inizio strada con diritto di precedenza", vero: true, fig: 52, cat: "precedenza", expl: "Vero." },
+        { id: 339, text: "Le strade incrocianti avranno il segnale di DARE PRECEDENZA o STOP", vero: true, fig: 52, cat: "precedenza", expl: "Vero." },
+        { id: 340, text: "Il segnale raffigurato si trova solo in autostrada", vero: false, fig: 52, cat: "precedenza", expl: "Falso." },
+        { id: 341, text: "Il segnale raffigurato dà la precedenza nei sensi unici alternati", vero: true, fig: 53, cat: "precedenza", expl: "Vero." },
+        { id: 342, text: "Possiamo percorrere la strettoia con precedenza", vero: true, fig: 53, cat: "precedenza", expl: "Vero." },
+        { id: 343, text: "Il segnale raffigurato impone di dare precedenza", vero: false, fig: 53, cat: "precedenza", expl: "Falso." },
+        { id: 344, text: "Il segnale raffigurato si trova prima di una strettoia", vero: true, fig: 53, cat: "precedenza", expl: "Vero." },
+        { id: 345, text: "Lo STOP è un segnale di obbligo generico", vero: false, fig: 41, cat: "precedenza", expl: "Falso." },
+        { id: 346, text: "I segnali di prescrizione comprendono precedenza, divieto e obbligo", vero: true, fig: null, cat: "precedenza", expl: "Vero." },
+        { id: 347, text: "Il preavviso di dare precedenza è triangolare", vero: true, fig: 42, cat: "precedenza", expl: "Vero." },
+        { id: 348, text: "Nell'incrocio con diritto, la strada secondaria ha linea sottile", vero: true, fig: 47, cat: "precedenza", expl: "Vero." },
+        { id: 349, text: "La confluenza a destra vieta il sorpasso", vero: false, fig: 50, cat: "precedenza", expl: "Falso." },
+        { id: 350, text: "Fine diritto di precedenza comporta arresto obbligatorio", vero: false, fig: 46, cat: "precedenza", expl: "Falso." },
+
+        /* --- CATEGORIA 4: DIVIETO --- */
+        { id: 401, text: "Il segnale raffigurato vieta la circolazione nei due sensi", vero: true, fig: 54, cat: "divieto", expl: "Vero." },
+        { id: 402, text: "Il segnale raffigurato consente il transito alle bici", vero: false, fig: 54, cat: "divieto", expl: "Falso." },
+        { id: 403, text: "Il segnale raffigurato è un Senso Vietato", vero: true, fig: 55, cat: "divieto", expl: "Vero." },
+        { id: 404, text: "Il segnale raffigurato vieta la sosta ma non la fermata", vero: false, fig: 55, cat: "divieto", expl: "Falso." },
+        { id: 405, text: "Il segnale raffigurato vieta di sorpassare veicoli a motore eccetto moto", vero: true, fig: 56, cat: "divieto", expl: "Vero." },
+        { id: 406, text: "Il segnale raffigurato consente a un'auto di sorpassare un camion", vero: false, fig: 56, cat: "divieto", expl: "Falso." },
+        { id: 407, text: "Il segnale raffigurato consente di sorpassare ciclomotori", vero: true, fig: 56, cat: "divieto", expl: "Vero." },
+        { id: 408, text: "Il segnale raffigurato impone distanza minima di 70 metri", vero: true, fig: 57, cat: "divieto", expl: "Vero." },
+        { id: 409, text: "Il segnale raffigurato indica velocità consigliata", vero: false, fig: 58, cat: "divieto", expl: "Falso. Limite massimo." },
+        { id: 410, text: "Il segnale raffigurato vieta segnalazioni acustiche", vero: true, fig: 59, cat: "divieto", expl: "Vero." },
+        { id: 411, text: "Il segnale raffigurato vieta sorpasso ai camion oltre 3.5t", vero: true, fig: 60, cat: "divieto", expl: "Vero." },
+        { id: 412, text: "Il segnale raffigurato vieta transito veicoli a trazione animale", vero: true, fig: 61, cat: "divieto", expl: "Vero." },
+        { id: 413, text: "Il segnale raffigurato vieta transito ai pedoni", vero: true, fig: 62, cat: "divieto", expl: "Vero." },
+        { id: 414, text: "Il segnale raffigurato vieta transito alle bici", vero: true, fig: 63, cat: "divieto", expl: "Vero." },
+        { id: 415, text: "Il segnale raffigurato vieta transito ai motocicli", vero: true, fig: 64, cat: "divieto", expl: "Vero." },
+        { id: 416, text: "Il segnale raffigurato vieta transito veicoli a braccia", vero: true, fig: 65, cat: "divieto", expl: "Vero." },
+        { id: 417, text: "Il segnale raffigurato vieta transito a tutti gli autoveicoli", vero: true, fig: 66, cat: "divieto", expl: "Vero." },
+        { id: 418, text: "Il segnale raffigurato vieta transito agli autobus", vero: true, fig: 67, cat: "divieto", expl: "Vero." },
+        { id: 419, text: "Divieto transito merci oltre 3.5t", vero: true, fig: 68, cat: "divieto", expl: "Vero." },
+        { id: 420, text: "Divieto transito merci oltre 6.5t", vero: true, fig: 69, cat: "divieto", expl: "Vero." },
+        { id: 421, text: "Divieto transito veicoli con rimorchio", vero: true, fig: 70, cat: "divieto", expl: "Vero." },
+        { id: 422, text: "Divieto transito macchine agricole", vero: true, fig: 71, cat: "divieto", expl: "Vero." },
+        { id: 423, text: "Divieto transito larghezza > 2.30m", vero: true, fig: 75, cat: "divieto", expl: "Vero." },
+        { id: 424, text: "Divieto transito altezza > 3.50m", vero: true, fig: 76, cat: "divieto", expl: "Vero." },
+        { id: 425, text: "Divieto transito lunghezza > 10m", vero: true, fig: 77, cat: "divieto", expl: "Vero." },
+        { id: 426, text: "Divieto transito massa per asse > 2.5t", vero: true, fig: 79, cat: "divieto", expl: "Vero." },
+        { id: 427, text: "Divieto merci pericolose", vero: true, fig: 72, cat: "divieto", expl: "Vero." },
+        { id: 428, text: "Divieto esplosivi", vero: true, fig: 73, cat: "divieto", expl: "Vero." },
+        { id: 429, text: "Divieto contaminanti acqua", vero: true, fig: 74, cat: "divieto", expl: "Vero." },
+        { id: 430, text: "Segnale Via Libera", vero: true, fig: 80, cat: "divieto", expl: "Vero." },
+        { id: 431, text: "Fine limite velocità", vero: true, fig: 81, cat: "divieto", expl: "Vero." },
+        { id: 432, text: "Fine divieto sorpasso", vero: true, fig: 82, cat: "divieto", expl: "Vero." },
+        { id: 433, text: "Fine divieto sorpasso camion", vero: true, fig: 83, cat: "divieto", expl: "Vero." },
+        { id: 434, text: "Divieto di sosta", vero: true, fig: 84, cat: "divieto", expl: "Vero." },
+        { id: 435, text: "Divieto sosta permanente fuori città", vero: true, fig: 84, cat: "divieto", expl: "Vero." },
+        { id: 436, text: "Consente sosta per 1 ora", vero: false, fig: 84, cat: "divieto", expl: "Falso." },
+        { id: 437, text: "Divieto di fermata", vero: true, fig: 85, cat: "divieto", expl: "Vero." },
+        { id: 438, text: "Rimozione forzata", vero: true, fig: 940, cat: "divieto", expl: "Vero." },
+        { id: 439, text: "Parcheggio autorizzato", vero: true, fig: 86, cat: "divieto", expl: "Vero." },
+        { id: 440, text: "Passo carrabile", vero: true, fig: 90, cat: "divieto", expl: "Vero." },
+        { id: 441, text: "Sosta invalidi", vero: true, fig: 91, cat: "divieto", expl: "Vero." },
+        { id: 442, text: "Sosta regolamentata", vero: true, fig: 92, cat: "divieto", expl: "Vero." },
+        { id: 443, text: "Preavviso di parcheggio", vero: true, fig: 89, cat: "divieto", expl: "Vero." },
+        { id: 444, text: "Vieta sosta a sinistra", vero: false, fig: 84, cat: "divieto", expl: "Falso." },
+        { id: 445, text: "Divieto sosta cessa al primo incrocio", vero: true, fig: 84, cat: "divieto", expl: "Vero." },
+        { id: 446, text: "Divieto sorpasso vale per moto che superano bici", vero: false, fig: 56, cat: "divieto", expl: "Falso." },
+        { id: 447, text: "Via Libera indica precedenza", vero: false, fig: 80, cat: "divieto", expl: "Falso." },
+        { id: 448, text: "Segnali divieto sono tondi bordati rosso", vero: true, fig: null, cat: "divieto", expl: "Vero." },
+        { id: 449, text: "Limite massimo obbliga a quella velocità", vero: false, fig: 58, cat: "divieto", expl: "Falso." },
+        { id: 450, text: "Divieto clacson non vale per feriti gravi", vero: true, fig: 59, cat: "divieto", expl: "Vero." },
+
+        /* --- CATEGORIA 5: OBBLIGO --- */
+        { id: 501, text: "Obbligo di proseguire diritto", vero: true, fig: 93, cat: "obbligo", expl: "Vero." },
+        { id: 502, text: "Vietato svoltare a sinistra", vero: true, fig: 93, cat: "obbligo", expl: "Vero." },
+        { id: 503, text: "Inizio senso unico", vero: false, fig: 93, cat: "obbligo", expl: "Falso." },
+        { id: 504, text: "Consente svolta a destra", vero: false, fig: 93, cat: "obbligo", expl: "Falso." },
+        { id: 505, text: "Obbligo svoltare a sinistra", vero: true, fig: 94, cat: "obbligo", expl: "Vero." },
+        { id: 506, text: "Passaggio obbligatorio a sinistra", vero: false, fig: 94, cat: "obbligo", expl: "Falso." },
+        { id: 507, text: "Segnale di prescrizione", vero: true, fig: 94, cat: "obbligo", expl: "Vero." },
+        { id: 508, text: "Obbligo svoltare a destra", vero: true, fig: 95, cat: "obbligo", expl: "Vero." },
+        { id: 509, text: "Preannuncia curva a destra", vero: false, fig: 95, cat: "obbligo", expl: "Falso." },
+        { id: 510, text: "Vietato andare diritto", vero: true, fig: 95, cat: "obbligo", expl: "Vero." },
+        { id: 511, text: "Preavviso obbligo destra", vero: true, fig: 96, cat: "obbligo", expl: "Vero." },
+        { id: 512, text: "Vietato svoltare a destra", vero: false, fig: 96, cat: "obbligo", expl: "Falso." },
+        { id: 513, text: "Preavviso obbligo sinistra", vero: true, fig: 97, cat: "obbligo", expl: "Vero." },
+        { id: 514, text: "Direzioni consentite destra e sinistra", vero: true, fig: 98, cat: "obbligo", expl: "Vero." },
+        { id: 515, text: "Direzioni diritto e destra", vero: true, fig: 99, cat: "obbligo", expl: "Vero." },
+        { id: 516, text: "Vietato svoltare a destra", vero: true, fig: 100, cat: "obbligo", expl: "Vero." },
+        { id: 517, text: "Passaggio obbligatorio sinistra", vero: true, fig: 101, cat: "obbligo", expl: "Vero." },
+        { id: 518, text: "Discesa pericolosa", vero: false, fig: 101, cat: "obbligo", expl: "Falso." },
+        { id: 519, text: "Passaggio obbligatorio destra", vero: true, fig: 102, cat: "obbligo", expl: "Vero." },
+        { id: 520, text: "Passaggio consentito destra e sinistra", vero: true, fig: 103, cat: "obbligo", expl: "Vero." },
+        { id: 521, text: "Rotatoria", vero: true, fig: 104, cat: "obbligo", expl: "Vero." },
+        { id: 522, text: "Segnale di divieto", vero: false, fig: 104, cat: "obbligo", expl: "Falso." },
+        { id: 523, text: "Obbligo tornare indietro", vero: false, fig: 104, cat: "obbligo", expl: "Falso." },
+        { id: 524, text: "Limite minimo 30", vero: true, fig: 105, cat: "obbligo", expl: "Vero." },
+        { id: 525, text: "Vietato superare 30", vero: false, fig: 105, cat: "obbligo", expl: "Falso." },
+        { id: 526, text: "Divieto veicoli lenti", vero: true, fig: 105, cat: "obbligo", expl: "Vero." },
+        { id: 527, text: "Fine limite minimo", vero: true, fig: 106, cat: "obbligo", expl: "Vero." },
+        { id: 528, text: "Catene a bordo", vero: false, fig: 107, cat: "obbligo", expl: "Falso. Montate." },
+        { id: 529, text: "Catene o gomme invernali", vero: true, fig: 107, cat: "obbligo", expl: "Vero." },
+        { id: 530, text: "Consiglia catene", vero: false, fig: 107, cat: "obbligo", expl: "Falso." },
+        { id: 531, text: "Percorso pedonale", vero: true, fig: 108, cat: "obbligo", expl: "Vero." },
+        { id: 532, text: "Pista ciclabile", vero: true, fig: 110, cat: "obbligo", expl: "Vero." },
+        { id: 533, text: "Divieto bici", vero: false, fig: 110, cat: "obbligo", expl: "Falso." },
+        { id: 534, text: "Pista ciclabile contigua", vero: true, fig: 112, cat: "obbligo", expl: "Vero." },
+        { id: 535, text: "Percorso misto pedoni/bici", vero: true, fig: 113, cat: "obbligo", expl: "Vero." },
+        { id: 536, text: "Percorso animali", vero: true, fig: 116, cat: "obbligo", expl: "Vero." },
+        { id: 537, text: "ALT Dogana", vero: true, fig: 118, cat: "obbligo", expl: "Vero." },
+        { id: 538, text: "ALT Polizia", vero: true, fig: 119, cat: "obbligo", expl: "Vero." },
+        { id: 539, text: "ALT Stazione", vero: true, fig: 120, cat: "obbligo", expl: "Vero." },
+        { id: 540, text: "Segnali obbligo tondi blu", vero: true, fig: null, cat: "obbligo", expl: "Vero." },
+        { id: 541, text: "Direzione obbligatoria vale per taxi", vero: true, fig: 93, cat: "obbligo", expl: "Vero." },
+        { id: 542, text: "Pista ciclabile per ciclomotori", vero: false, fig: 110, cat: "obbligo", expl: "Falso." },
+        { id: 543, text: "Fine percorso pedonale", vero: true, fig: 109, cat: "obbligo", expl: "Vero." },
+        { id: 544, text: "Passaggio obbligatorio su isola di traffico", vero: true, fig: 102, cat: "obbligo", expl: "Vero." },
+        { id: 545, text: "Rotatoria dà precedenza", vero: false, fig: 104, cat: "obbligo", expl: "Falso." },
+        { id: 546, text: "Limite minimo obbliga catene", vero: false, fig: 105, cat: "obbligo", expl: "Falso." },
+        { id: 547, text: "Percorso pedonale vieta auto", vero: true, fig: 108, cat: "obbligo", expl: "Vero." },
+        { id: 548, text: "ALT Polizia solo in autostrada", vero: false, fig: 119, cat: "obbligo", expl: "Falso." },
+        { id: 549, text: "Direzione destra/sinistra vieta dritto", vero: true, fig: 98, cat: "obbligo", expl: "Vero." },
+        { id: 550, text: "Rotatoria è segnale pericolo", vero: false, fig: 104, cat: "obbligo", expl: "Falso." },
+
+        /* --- CATEGORIA 6: SEGNALETICA --- */
+        { id: 601, text: "Inizio senso unico", vero: true, fig: 349, cat: "segnaletica", expl: "Vero." },
+        { id: 602, text: "Senso unico parallelo", vero: true, fig: 348, cat: "segnaletica", expl: "Vero." },
+        { id: 603, text: "Obbligo andare dritto", vero: false, fig: 349, cat: "segnaletica", expl: "Falso." },
+        { id: 604, text: "Strada senza uscita", vero: true, fig: 309, cat: "segnaletica", expl: "Vero." },
+        { id: 605, text: "Preavviso strada senza uscita", vero: true, fig: 311, cat: "segnaletica", expl: "Vero." },
+        { id: 606, text: "Strada riservata veicoli motore", vero: true, fig: 314, cat: "segnaletica", expl: "Vero." },
+        { id: 607, text: "Galleria", vero: true, fig: 315, cat: "segnaletica", expl: "Vero." },
+        { id: 608, text: "Ponte", vero: true, fig: 320, cat: "segnaletica", expl: "Vero." },
+        { id: 609, text: "Sottopassaggio pedonale", vero: true, fig: 321, cat: "segnaletica", expl: "Vero." },
+        { id: 610, text: "Inversione di marcia", vero: true, fig: 322, cat: "segnaletica", expl: "Vero." },
+        { id: 611, text: "Ospedale", vero: true, fig: 210, cat: "segnaletica", expl: "Vero." },
+        { id: 612, text: "Attraversamento pedonale", vero: true, fig: 306, cat: "segnaletica", expl: "Vero." },
+        { id: 613, text: "Fermata autobus", vero: true, fig: 324, cat: "segnaletica", expl: "Vero." },
+        { id: 614, text: "Sosta taxi", vero: true, fig: 325, cat: "segnaletica", expl: "Vero." },
+        { id: 615, text: "Rifornimento", vero: true, fig: 364, cat: "segnaletica", expl: "Vero." },
+        { id: 616, text: "Telefono", vero: true, fig: 362, cat: "segnaletica", expl: "Vero." },
+        { id: 617, text: "SOS", vero: true, fig: 366, cat: "segnaletica", expl: "Vero." },
+        { id: 618, text: "Camper service", vero: true, fig: 382, cat: "segnaletica", expl: "Vero." },
+        { id: 619, text: "Inizio autostrada", vero: true, fig: 200, cat: "segnaletica", expl: "Vero." },
+        { id: 620, text: "Inizio extraurbana principale", vero: true, fig: 193, cat: "segnaletica", expl: "Vero." },
+        { id: 621, text: "Velocità consigliata", vero: true, fig: 318, cat: "segnaletica", expl: "Vero." },
+        { id: 622, text: "Obbligo velocità", vero: false, fig: 318, cat: "segnaletica", expl: "Falso." },
+        { id: 623, text: "Fine autostrada", vero: true, fig: 201, cat: "segnaletica", expl: "Vero." },
+        { id: 624, text: "Distanza", vero: true, fig: 116, cat: "segnaletica", expl: "Vero." },
+        { id: 625, text: "Estesa", vero: true, fig: 117, cat: "segnaletica", expl: "Vero." },
+        { id: 626, text: "Giorni feriali", vero: true, fig: 126, cat: "segnaletica", expl: "Vero." },
+        { id: 627, text: "Giorni festivi", vero: true, fig: 125, cat: "segnaletica", expl: "Vero." },
+        { id: 628, text: "Orario", vero: true, fig: 123, cat: "segnaletica", expl: "Vero." },
+        { id: 629, text: "Limitazione", vero: true, fig: 127, cat: "segnaletica", expl: "Vero." },
+        { id: 630, text: "Inizio", vero: true, fig: 120, cat: "segnaletica", expl: "Vero." },
+        { id: 631, text: "Continuazione", vero: true, fig: 121, cat: "segnaletica", expl: "Vero." },
+        { id: 632, text: "Fine", vero: true, fig: 122, cat: "segnaletica", expl: "Vero." },
+        { id: 633, text: "Pioggia", vero: true, fig: 141, cat: "segnaletica", expl: "Vero." },
+        { id: 634, text: "Ghiaccio", vero: true, fig: 140, cat: "segnaletica", expl: "Vero." },
+        { id: 635, text: "Allagamento", vero: true, fig: 135, cat: "segnaletica", expl: "Vero." },
+        { id: 636, text: "Autocarri rallentamento", vero: true, fig: 147, cat: "segnaletica", expl: "Vero." },
+        { id: 637, text: "Sgombraneve", vero: true, fig: 134, cat: "segnaletica", expl: "Vero." },
+        { id: 638, text: "Tornante", vero: true, fig: 144, cat: "segnaletica", expl: "Vero." },
+        { id: 639, text: "Andamento strada principale", vero: true, fig: 146, cat: "segnaletica", expl: "Vero." },
+        { id: 640, text: "Corsia bus", vero: true, fig: 128, cat: "segnaletica", expl: "Vero." },
+        { id: 641, text: "Lavori in corso", vero: true, fig: 275, cat: "segnaletica", expl: "Vero." },
+        { id: 642, text: "Semaforo temporaneo", vero: true, fig: 281, cat: "segnaletica", expl: "Vero." },
+        { id: 643, text: "Strisce gialle cantiere", vero: true, fig: null, cat: "segnaletica", expl: "Vero." },
+        { id: 644, text: "Deviazione", vero: true, fig: 284, cat: "segnaletica", expl: "Vero." },
+        { id: 645, text: "Delineatore ostacolo", vero: true, fig: 471, cat: "segnaletica", expl: "Vero." },
+        { id: 646, text: "Delineatori permanenti", vero: false, fig: 471, cat: "segnaletica", expl: "Falso." },
+        { id: 647, text: "Direzione polizia", vero: false, fig: 325, cat: "segnaletica", expl: "Falso." },
+        { id: 648, text: "Inizio centro abitato", vero: false, fig: 116, cat: "segnaletica", expl: "Falso." },
+        { id: 649, text: "Uso corsie", vero: true, fig: 331, cat: "segnaletica", expl: "Vero." },
+        { id: 650, text: "Chiusura corsia", vero: true, fig: 332, cat: "segnaletica", expl: "Vero." },
+
+        /* --- CATEGORIA 7: NORME --- */
+        { id: 701, text: "Velocità in base al fondo stradale", vero: true, fig: null, cat: "norme", expl: "Vero." },
+        { id: 702, text: "Velocità in base condizioni psicofisiche", vero: true, fig: null, cat: "norme", expl: "Vero." },
+        { id: 703, text: "Ridurre velocità in curva", vero: true, fig: null, cat: "norme", expl: "Vero." },
+        { id: 704, text: "Regolare velocità scuole", vero: true, fig: null, cat: "norme", expl: "Vero." },
+        { id: 705, text: "Velocità moderata di notte", vero: true, fig: null, cat: "norme", expl: "Vero." },
+        { id: 706, text: "Ridurre velocità abbagliamento", vero: true, fig: null, cat: "norme", expl: "Vero." },
+        { id: 707, text: "Velocità non deve costituire pericolo", vero: true, fig: null, cat: "norme", expl: "Vero." },
+        { id: 708, text: "Diminuire velocità vento", vero: true, fig: null, cat: "norme", expl: "Vero." },
+        { id: 709, text: "Regolare solo in base ai limiti", vero: false, fig: null, cat: "norme", expl: "Falso." },
+        { id: 710, text: "Ridurre solo per polizia", vero: false, fig: null, cat: "norme", expl: "Falso." },
+        { id: 711, text: "Limite urbano 50", vero: true, fig: null, cat: "norme", expl: "Vero." },
+        { id: 712, text: "Limite autostrada 130", vero: true, fig: null, cat: "norme", expl: "Vero." },
+        { id: 713, text: "Limite extraurbana principale 110", vero: true, fig: null, cat: "norme", expl: "Vero." },
+        { id: 714, text: "Limite extraurbana secondaria 90", vero: true, fig: null, cat: "norme", expl: "Vero." },
+        { id: 715, text: "Autostrada pioggia 110", vero: true, fig: null, cat: "norme", expl: "Vero." },
+        { id: 716, text: "Neopatentati autostrada 100", vero: true, fig: null, cat: "norme", expl: "Vero." },
+        { id: 717, text: "Ciclomotori max 45", vero: true, fig: null, cat: "norme", expl: "Vero." },
+        { id: 718, text: "Macchine agricole 40", vero: true, fig: null, cat: "norme", expl: "Vero." },
+        { id: 719, text: "Urbano sempre 70", vero: false, fig: null, cat: "norme", expl: "Falso." },
+        { id: 720, text: "Autostrada 3 corsie 150", vero: false, fig: null, cat: "norme", expl: "Falso." },
+        { id: 721, text: "Distanza sicurezza tamponamento", vero: true, fig: null, cat: "norme", expl: "Vero." },
+        { id: 722, text: "Distanza dipende velocità", vero: true, fig: null, cat: "norme", expl: "Vero." },
+        { id: 723, text: "Distanza dipende riflessi", vero: true, fig: null, cat: "norme", expl: "Vero." },
+        { id: 724, text: "Distanza uguale spazio reazione", vero: true, fig: null, cat: "norme", expl: "Vero." },
+        { id: 725, text: "Distanza dipende aderenza", vero: true, fig: null, cat: "norme", expl: "Vero." },
+        { id: 726, text: "Distanza fissa 20m", vero: false, fig: null, cat: "norme", expl: "Falso." },
+        { id: 727, text: "Distanza non dipende carico", vero: false, fig: null, cat: "norme", expl: "Falso." },
+        { id: 728, text: "50kmh distanza 14m", vero: true, fig: null, cat: "norme", expl: "Vero." },
+        { id: 729, text: "100kmh distanza 28m", vero: true, fig: null, cat: "norme", expl: "Vero." },
+        { id: 730, text: "Sgombraneve 20m", vero: true, fig: null, cat: "norme", expl: "Vero." },
+        { id: 731, text: "Frenatura aumenta bagnato", vero: true, fig: null, cat: "norme", expl: "Vero." },
+        { id: 732, text: "Frenatura quadruplica velocità doppia", vero: true, fig: null, cat: "norme", expl: "Vero." },
+        { id: 733, text: "Spazio arresto = reazione + frenata", vero: true, fig: null, cat: "norme", expl: "Vero." },
+        { id: 734, text: "Tempo reazione 1 secondo", vero: true, fig: null, cat: "norme", expl: "Vero." },
+        { id: 735, text: "Frenatura diminuisce carico", vero: false, fig: null, cat: "norme", expl: "Falso." },
+        { id: 736, text: "Frenatura aumenta discesa", vero: true, fig: null, cat: "norme", expl: "Vero." },
+        { id: 737, text: "Circolare a destra", vero: true, fig: null, cat: "norme", expl: "Vero." },
+        { id: 738, text: "Impegnare corsia destra", vero: true, fig: null, cat: "norme", expl: "Vero." },
+        { id: 739, text: "Svolta sinistra centro", vero: true, fig: null, cat: "norme", expl: "Vero." },
+        { id: 740, text: "Svolta destra margine", vero: true, fig: null, cat: "norme", expl: "Vero." },
+        { id: 741, text: "File parallele traffico", vero: true, fig: null, cat: "norme", expl: "Vero." },
+        { id: 742, text: "Vietato a cavallo strisce", vero: true, fig: null, cat: "norme", expl: "Vero." },
+        { id: 743, text: "Moto appaiate", vero: false, fig: null, cat: "norme", expl: "Falso." },
+        { id: 744, text: "Curva sinistra margine destro", vero: true, fig: null, cat: "norme", expl: "Vero." },
+        { id: 745, text: "Segnalare cambio corsia", vero: true, fig: null, cat: "norme", expl: "Vero." },
+        { id: 746, text: "Cambio corsia incrocio", vero: false, fig: null, cat: "norme", expl: "Falso." },
+        { id: 747, text: "3 corsie centrale sorpasso", vero: true, fig: null, cat: "norme", expl: "Vero." },
+        { id: 748, text: "Cambio improvviso pericoloso", vero: true, fig: null, cat: "norme", expl: "Vero." },
+        { id: 749, text: "Autostrada corsia destra", vero: true, fig: null, cat: "norme", expl: "Vero." },
+        { id: 750, text: "Contromano curve", vero: false, fig: null, cat: "norme", expl: "Falso." },
+
+        /* --- CATEGORIA 8: NORME 2 --- */
+        { id: 801, text: "Sorpasso vietato curve", vero: true, fig: null, cat: "norme", expl: "Vero." },
+        { id: 802, text: "Sorpasso curva senso unico", vero: true, fig: null, cat: "norme", expl: "Vero." },
+        { id: 803, text: "Doppio sorpasso vietato", vero: true, fig: null, cat: "norme", expl: "Vero." },
+        { id: 804, text: "Sorpasso tram destra", vero: true, fig: null, cat: "norme", expl: "Vero." },
+        { id: 805, text: "Sorpasso destra svolta sinistra", vero: true, fig: null, cat: "norme", expl: "Vero." },
+        { id: 806, text: "Sorpasso vietato dossi senso unico", vero: false, fig: null, cat: "norme", expl: "Falso." },
+        { id: 807, text: "Sorpasso incrocio invadendo", vero: true, fig: null, cat: "norme", expl: "Vero." },
+        { id: 808, text: "Verificare direzione opposta", vero: true, fig: null, cat: "norme", expl: "Vero." },
+        { id: 809, text: "Sorpassato non accelerare", vero: true, fig: null, cat: "norme", expl: "Vero." },
+        { id: 810, text: "Sorpasso vietato pericolo", vero: true, fig: null, cat: "norme", expl: "Vero." },
+        { id: 811, text: "Fermata breve", vero: true, fig: null, cat: "norme", expl: "Vero." },
+        { id: 812, text: "Sosta prolungata", vero: true, fig: null, cat: "norme", expl: "Vero." },
+        { id: 813, text: "Sosta vietata passo carrabile", vero: true, fig: null, cat: "norme", expl: "Vero." },
+        { id: 814, text: "Sosta vietata strisce", vero: true, fig: null, cat: "norme", expl: "Vero." },
+        { id: 815, text: "Sosta vietata passaggi livello", vero: true, fig: null, cat: "norme", expl: "Vero." },
+        { id: 816, text: "Sosta vietata carreggiata extraurbana", vero: true, fig: null, cat: "norme", expl: "Vero." },
+        { id: 817, text: "Moto seconda fila", vero: true, fig: null, cat: "norme", expl: "Vero." },
+        { id: 818, text: "Sosta vietata bus", vero: true, fig: null, cat: "norme", expl: "Vero." },
+        { id: 819, text: "Sosta salita marcia", vero: true, fig: null, cat: "norme", expl: "Vero." },
+        { id: 820, text: "Sosta motore acceso", vero: false, fig: null, cat: "norme", expl: "Falso." },
+        { id: 821, text: "Inversione autostrada vietata", vero: true, fig: null, cat: "norme", expl: "Vero." },
+        { id: 822, text: "Retromarcia autostrada vietata", vero: true, fig: null, cat: "norme", expl: "Vero." },
+        { id: 823, text: "Pedoni autostrada vietati", vero: true, fig: null, cat: "norme", expl: "Vero." },
+        { id: 824, text: "Autostrada corsia destra", vero: true, fig: null, cat: "norme", expl: "Vero." },
+        { id: 825, text: "Corsia emergenza traffico", vero: false, fig: null, cat: "norme", expl: "Falso." },
+        { id: 826, text: "Autostop vietato", vero: false, fig: null, cat: "norme", expl: "Falso. È vietato dare passaggi?" },
+        { id: 827, text: "Limite autostrada 130", vero: true, fig: null, cat: "norme", expl: "Vero." },
+        { id: 828, text: "Sosta area servizio 24h", vero: true, fig: null, cat: "norme", expl: "Vero." },
+        { id: 829, text: "Traino vietato autostrada", vero: true, fig: null, cat: "norme", expl: "Vero." },
+        { id: 830, text: "Moto < 150 autostrada", vero: true, fig: null, cat: "norme", expl: "Vero." },
+        { id: 831, text: "Carico portata utile", vero: true, fig: null, cat: "norme", expl: "Vero." },
+        { id: 832, text: "Sporgenza posteriore 3/10", vero: true, fig: null, cat: "norme", expl: "Vero." },
+        { id: 833, text: "Sporgenza anteriore", vero: false, fig: null, cat: "norme", expl: "Falso." },
+        { id: 834, text: "Animali domestici", vero: true, fig: null, cat: "norme", expl: "Vero." },
+        { id: 835, text: "Carico moto 50cm", vero: true, fig: null, cat: "norme", expl: "Vero." },
+        { id: 836, text: "Passeggeri numero massimo", vero: true, fig: null, cat: "norme", expl: "Vero." },
+        { id: 837, text: "Pannello carichi bianco nero", vero: false, fig: 302, cat: "norme", expl: "Falso." },
+        { id: 838, text: "Moto minori 5 anni", vero: true, fig: null, cat: "norme", expl: "Vero." },
+        { id: 839, text: "Auto sempre 5 posti", vero: false, fig: null, cat: "norme", expl: "Falso." },
+        { id: 840, text: "Traino urbano consentito", vero: true, fig: null, cat: "norme", expl: "Vero." },
+        { id: 841, text: "Cinture posteriori", vero: true, fig: null, cat: "norme", expl: "Vero." },
+        { id: 842, text: "Casco obbligatorio", vero: true, fig: null, cat: "norme", expl: "Vero." },
+        { id: 843, text: "Triangolo solo notte", vero: false, fig: null, cat: "norme", expl: "Falso." },
+        { id: 844, text: "Soccorsi feriti", vero: true, fig: null, cat: "norme", expl: "Vero." },
+        { id: 845, text: "Precedenza sirene", vero: true, fig: null, cat: "norme", expl: "Vero." },
+        { id: 846, text: "Giubbotto obbligatorio", vero: true, fig: null, cat: "norme", expl: "Vero." },
+        { id: 847, text: "Cellulare vietato", vero: false, fig: null, cat: "norme", expl: "Falso. È consentito?" },
+        { id: 848, text: "Riposo stanchezza", vero: true, fig: null, cat: "norme", expl: "Vero." },
+        { id: 849, text: "Alcool rallenta reazione", vero: false, fig: null, cat: "norme", expl: "Falso." },
+        { id: 850, text: "Droghe reato", vero: true, fig: null, cat: "norme", expl: "Vero." },
+
+        /* --- CATEGORIA 9: DOCUMENTI --- */
+        { id: 901, text: "Patente B autovetture", vero: true, fig: null, cat: "documenti", expl: "Vero." },
+        { id: 902, text: "Patente B tutti motocicli", vero: false, fig: null, cat: "documenti", expl: "Falso." },
+        { id: 903, text: "Patente B agricole", vero: true, fig: null, cat: "documenti", expl: "Vero." },
+        { id: 904, text: "Patente B camper", vero: true, fig: null, cat: "documenti", expl: "Vero." },
+        { id: 905, text: "Patente AM 14 anni", vero: true, fig: null, cat: "documenti", expl: "Vero." },
+        { id: 906, text: "Patente B rimorchio leggero", vero: true, fig: null, cat: "documenti", expl: "Vero." },
+        { id: 907, text: "Patente A1 16 anni", vero: true, fig: null, cat: "documenti", expl: "Vero." },
+        { id: 908, text: "Autobus patente C", vero: false, fig: null, cat: "documenti", expl: "Falso." },
+        { id: 909, text: "Patente B1 quadricicli", vero: true, fig: null, cat: "documenti", expl: "Vero." },
+        { id: 910, text: "Patente B include AM", vero: true, fig: null, cat: "documenti", expl: "Vero." },
+        { id: 911, text: "Validità 10 anni", vero: true, fig: null, cat: "documenti", expl: "Vero." },
+        { id: 912, text: "20 punti", vero: true, fig: null, cat: "documenti", expl: "Vero." },
+        { id: 913, text: "Bonus neopatentati", vero: true, fig: null, cat: "documenti", expl: "Vero." },
+        { id: 914, text: "Revoca automatica 0 punti", vero: false, fig: null, cat: "documenti", expl: "Falso." },
+        { id: 915, text: "Cellulare punti", vero: true, fig: null, cat: "documenti", expl: "Vero." },
+        { id: 916, text: "Cinture punti", vero: true, fig: null, cat: "documenti", expl: "Vero." },
+        { id: 917, text: "Ebbrezza 10 punti", vero: true, fig: null, cat: "documenti", expl: "Vero." },
+        { id: 918, text: "Carta circolazione a bordo", vero: true, fig: null, cat: "documenti", expl: "Vero." },
+        { id: 919, text: "Carta circolazione posti", vero: true, fig: null, cat: "documenti", expl: "Vero." },
+        { id: 920, text: "Certificato proprietà a bordo", vero: false, fig: null, cat: "documenti", expl: "Falso." },
+        { id: 921, text: "Revisione scaduta sequestro", vero: false, fig: null, cat: "documenti", expl: "Falso." },
+        { id: 922, text: "RCA obbligatoria", vero: true, fig: null, cat: "documenti", expl: "Vero." },
+        { id: 923, text: "Senza RCA sequestro", vero: true, fig: null, cat: "documenti", expl: "Vero." },
+        { id: 924, text: "Resp civile proprietario", vero: true, fig: null, cat: "documenti", expl: "Vero." },
+        { id: 925, text: "Resp penale personale", vero: true, fig: null, cat: "documenti", expl: "Vero." },
+        { id: 926, text: "Accordo risarcimento", vero: true, fig: null, cat: "documenti", expl: "Vero." },
+        { id: 927, text: "Forza maggiore", vero: true, fig: null, cat: "documenti", expl: "Vero." },
+        { id: 928, text: "Penale ogni incidente", vero: false, fig: null, cat: "documenti", expl: "Falso." },
+        { id: 929, text: "Resp cinture minori", vero: true, fig: null, cat: "documenti", expl: "Vero." },
+        { id: 930, text: "Alcool piccole quantità", vero: true, fig: null, cat: "documenti", expl: "Vero." },
+        { id: 931, text: "Limite neopatentati 0.5", vero: false, fig: null, cat: "documenti", expl: "Falso." },
+        { id: 932, text: "Droghe sospensione", vero: true, fig: null, cat: "documenti", expl: "Vero." },
+        { id: 933, text: "Farmaci guida", vero: true, fig: null, cat: "documenti", expl: "Vero." },
+        { id: 934, text: "Caffè sonno", vero: false, fig: null, cat: "documenti", expl: "Falso." },
+        { id: 935, text: "Alimentazione sonno", vero: true, fig: null, cat: "documenti", expl: "Vero." },
+        { id: 936, text: "Triangolo obbligatorio", vero: true, fig: null, cat: "documenti", expl: "Vero." },
+        { id: 937, text: "Giubbotto a bordo", vero: true, fig: null, cat: "documenti", expl: "Vero." },
+        { id: 938, text: "Targa leggibile", vero: true, fig: null, cat: "documenti", expl: "Vero." },
+        { id: 939, text: "Modifiche senza aggiornamento", vero: false, fig: null, cat: "documenti", expl: "Falso." },
+        { id: 940, text: "Rivalsa assicurazione", vero: true, fig: null, cat: "documenti", expl: "Vero." },
+        { id: 941, text: "Bollo a bordo", vero: false, fig: null, cat: "documenti", expl: "Falso." },
+        { id: 942, text: "Patente scaduta ritiro", vero: true, fig: null, cat: "documenti", expl: "Vero." },
+        { id: 943, text: "Revisione motorizzazione", vero: true, fig: null, cat: "documenti", expl: "Vero." },
+        { id: 944, text: "Verifica efficienza", vero: true, fig: null, cat: "documenti", expl: "Vero." },
+        { id: 945, text: "Airbag pericoloso", vero: true, fig: null, cat: "documenti", expl: "Vero." },
+        { id: 946, text: "Spie rosse", vero: true, fig: null, cat: "documenti", expl: "Vero." },
+        { id: 947, text: "Spia riserva gialla", vero: true, fig: null, cat: "documenti", expl: "Vero." },
+        { id: 948, text: "Spia abbaglianti verde", vero: false, fig: null, cat: "documenti", expl: "Falso." },
+        { id: 949, text: "Start stop", vero: true, fig: null, cat: "documenti", expl: "Vero." },
+        { id: 950, text: "Ruota scorta obbligo", vero: false, fig: null, cat: "documenti", expl: "Falso." },
+
+        /* --- CATEGORIA 10: MISTI --- */
+        { id: 1051, text: "Massimale RCA", vero: true, fig: null, cat: "documenti", expl: "Vero." },
+        { id: 1052, text: "Massimale cose > persone", vero: false, fig: null, cat: "documenti", expl: "Falso." },
+        { id: 1053, text: "Bonus malus", vero: true, fig: null, cat: "documenti", expl: "Vero." },
+        { id: 1054, text: "Assicurazione furto", vero: false, fig: null, cat: "documenti", expl: "Falso." },
+        { id: 1055, text: "Fondo vittime", vero: true, fig: null, cat: "documenti", expl: "Vero." },
+        { id: 1056, text: "Spia batteria ricarica eccessiva", vero: false, fig: 700, cat: "norme", expl: "Falso." },
+        { id: 1057, text: "Temperatura acqua aprire caldo", vero: false, fig: 698, cat: "norme", expl: "Falso." },
+        { id: 1058, text: "Spia emergenza rossa", vero: true, fig: 697, cat: "norme", expl: "Vero." },
+        { id: 1059, text: "Spia freni freno a mano", vero: true, fig: 703, cat: "norme", expl: "Vero." },
+        { id: 1060, text: "Emergenza motore spento", vero: true, fig: null, cat: "norme", expl: "Vero." },
+        { id: 1061, text: "Luci posizione città notte", vero: false, fig: null, cat: "norme", expl: "Falso." },
+        { id: 1062, text: "Fendinebbia giorno", vero: true, fig: null, cat: "norme", expl: "Vero." },
+        { id: 1063, text: "Luci sosta fuori", vero: false, fig: null, cat: "norme", expl: "Falso." },
+        { id: 1064, text: "Anabbagliante rotto uso abbagliante", vero: false, fig: null, cat: "norme", expl: "Falso." },
+        { id: 1065, text: "Retromarcia bianca", vero: true, fig: null, cat: "norme", expl: "Vero." },
+        { id: 1066, text: "Uscita parcheggio precedenza", vero: true, fig: null, cat: "precedenza", expl: "Vero." },
+        { id: 1067, text: "Inversione precedenza", vero: false, fig: null, cat: "precedenza", expl: "Falso." },
+        { id: 1068, text: "Tram precedenza solo destra", vero: false, fig: null, cat: "precedenza", expl: "Falso." },
+        { id: 1069, text: "Sbocco sentieri", vero: true, fig: null, cat: "precedenza", expl: "Vero." },
+        { id: 1070, text: "Giallo lampeggiante sinistra", vero: true, fig: 161, cat: "precedenza", expl: "Vero." },
+        { id: 1071, text: "Vigile braccia verso", vero: true, fig: 377, cat: "segnaletica", expl: "Vero." },
+        { id: 1072, text: "Vigile profilo", vero: true, fig: 378, cat: "segnaletica", expl: "Vero." },
+        { id: 1073, text: "Vigile braccio alto", vero: true, fig: 379, cat: "segnaletica", expl: "Vero." },
+        { id: 1074, text: "Fischio prolungato", vero: true, fig: null, cat: "segnaletica", expl: "Vero." },
+        { id: 1075, text: "Agenti prevalgono", vero: true, fig: null, cat: "segnaletica", expl: "Vero." },
+        { id: 1076, text: "Sdrucciolevole curve", vero: false, fig: 24, cat: "pericolo", expl: "Falso." },
+        { id: 1077, text: "Caduta massi clacson", vero: false, fig: 32, cat: "pericolo", expl: "Falso." },
+        { id: 1078, text: "Cane anteriore", vero: false, fig: null, cat: "norme", expl: "Falso." },
+        { id: 1079, text: "Cuffie sonore", vero: false, fig: null, cat: "norme", expl: "Falso." },
+        { id: 1080, text: "Poggiatesta riposo", vero: false, fig: null, cat: "norme", expl: "Falso." },
+        { id: 1081, text: "Traino 80 kmh", vero: true, fig: null, cat: "norme", expl: "Vero." },
+        { id: 1082, text: "Patente B macchine op eccezionali", vero: false, fig: null, cat: "documenti", expl: "Falso." },
+        { id: 1083, text: "Vento galleria", vero: false, fig: 37, cat: "pericolo", expl: "Falso." },
+        { id: 1084, text: "Abbaglianti città buia", vero: false, fig: null, cat: "norme", expl: "Falso." },
+        { id: 1085, text: "Divieto sosta 24h", vero: false, fig: 84, cat: "divieto", expl: "Falso." },
+        { id: 1086, text: "Sosta cassonetti", vero: false, fig: null, cat: "norme", expl: "Falso." },
+        { id: 1087, text: "Sangue naso indietro", vero: false, fig: null, cat: "norme", expl: "Falso." },
+        { id: 1088, text: "Deformata giallo", vero: true, fig: 271, cat: "pericolo", expl: "Vero." },
+        { id: 1089, text: "Doppio senso inizio", vero: false, fig: 28, cat: "pericolo", expl: "Falso." },
+        { id: 1090, text: "Diritto precedenza non fermarsi", vero: false, fig: 52, cat: "precedenza", expl: "Falso." },
+        { id: 1091, text: "Revisione dubbi", vero: true, fig: null, cat: "documenti", expl: "Vero." },
+        { id: 1092, text: "Revoca guida sospesa", vero: true, fig: null, cat: "documenti", expl: "Vero." },
+        { id: 1093, text: "Sospensione tempo", vero: true, fig: null, cat: "documenti", expl: "Vero." },
+        { id: 1094, text: "Minima sorpasso 90", vero: false, fig: null, cat: "norme", expl: "Falso." },
+        { id: 1095, text: "Sorpasso tram destra vietato", vero: false, fig: null, cat: "norme", expl: "Falso." },
+        { id: 1096, text: "Parcheggio lun ven domenica libera", vero: true, fig: 86, cat: "segnaletica", expl: "Vero." },
+        { id: 1097, text: "Catadiottri visibilità", vero: true, fig: null, cat: "norme", expl: "Vero." },
+        { id: 1098, text: "Strisce continue svolta", vero: true, fig: null, cat: "segnaletica", expl: "Vero." },
+        { id: 1099, text: "Preavviso destra vieta sinistra", vero: true, fig: 96, cat: "obbligo", expl: "Vero." },
+        { id: 1100, text: "Rinnovo 10 anni", vero: true, fig: null, cat: "documenti", expl: "Vero." }
+    ];
+
+    /* ========================================================================
+       CONFIGURAZIONE CATEGORIE
+       ======================================================================== 
+    */
+    const chapters = [
+        { id: 'veicoli', title: 'Definizioni Veicoli' },
+        { id: 'pericolo', title: 'Segnali di Pericolo' },
+        { id: 'precedenza', title: 'Segnali di Precedenza' },
+        { id: 'divieto', title: 'Segnali di Divieto' },
+        { id: 'obbligo', title: 'Segnali di Obbligo' },
+        { id: 'segnaletica', title: 'Segnaletica e Pannelli' },
+        { id: 'norme', title: 'Norme di Comportamento' },
+        { id: 'documenti', title: 'Documenti e Sicurezza' }
+    ];
+
+    /* --- LOGICA DELL'APP --- */
+    let session = { mode: '', queue: [], index: 0, score: 0, errors: 0 };
+    let timerInterval = null;
+    let userStats = JSON.parse(localStorage.getItem('patenteMasterApp')) || {
+        totalExams: 0, passedExams: 0, history: [], errorsBank: [] 
+    };
+
+    updateDashboard();
+
+    // NAVIGAZIONE
+    function goHome() {
+        stopTimer();
+        document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
+        document.getElementById('view-home').classList.add('active');
+        updateDashboard();
+    }
+    function resetData() {
+        if(confirm("Vuoi cancellare tutti i progressi e lo storico?")) {
+            localStorage.removeItem('patenteMasterApp');
+            location.reload();
+        }
+    }
+    function showView(id) {
+        document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+    }
+    function updateDashboard() {
+        document.getElementById('stat-total').innerText = userStats.totalExams;
+        document.getElementById('stat-passed').innerText = userStats.passedExams;
+        document.getElementById('err-count-badge').innerText = userStats.errorsBank.length;
+        const revCard = document.getElementById('card-review');
+        if (userStats.errorsBank.length === 0) {
+            revCard.classList.add('disabled'); revCard.style.opacity = "0.5";
+        } else {
+            revCard.classList.remove('disabled'); revCard.style.opacity = "1";
+        }
+        const historyContainer = document.getElementById('history-dots');
+        historyContainer.innerHTML = "";
+        for(let i=0; i<5; i++) {
+            const dot = document.createElement('div');
+            dot.className = "dot";
+            if (userStats.history[i]) dot.classList.add(userStats.history[i]);
+            historyContainer.appendChild(dot);
+        }
+    }
+
+    // TIMER
+    function startTimer() {
+        const display = document.getElementById('timer-display');
+        display.style.display = "block";
+        display.classList.remove('urgent');
+        let seconds = 30 * 60;
+        updateTimerText(seconds);
+        clearInterval(timerInterval);
+        timerInterval = setInterval(() => {
+            seconds--;
+            updateTimerText(seconds);
+            if(seconds <= 60) display.classList.add('urgent');
+            if(seconds <= 0) { stopTimer(); alert("TEMPO SCADUTO!"); endSession(); }
+        }, 1000);
+    }
+    function stopTimer() { clearInterval(timerInterval); document.getElementById('timer-display').style.display = "none"; }
+    function updateTimerText(sec) {
+        const m = Math.floor(sec / 60).toString().padStart(2, '0');
+        const s = (sec % 60).toString().padStart(2, '0');
+        document.getElementById('timer-display').innerText = `${m}:${s}`;
+    }
+
+    // SESSIONI
+    function goToChapters() {
+        const list = document.getElementById('chapters-list');
+        list.innerHTML = "";
+        
+        if (!db || db.length === 0) {
+            list.innerHTML = "<p style='text-align:center; color:red;'>Nessun quiz caricato.</p>";
+            showView('view-chapters');
+            return;
+        }
+
+        chapters.forEach(chap => {
+            const count = db.filter(q => q.cat === chap.id).length;
+            const div = document.createElement('div');
+            div.className = 'chapter-card';
+            div.innerHTML = `<span class="chapter-title">${chap.title}</span><span class="chapter-count">${count}</span>`;
+            div.onclick = () => startSession('studio', chap.id, chap.title);
+            list.appendChild(div);
+        });
+        showView('view-chapters');
+    }
+    function startSession(mode, catId = null, catTitle = "") {
+        session.mode = mode; session.index = 0; session.score = 0; session.errors = 0; session.queue = [];
+        const lbl = document.getElementById('quiz-mode-label');
+        const endBtn = document.getElementById('btn-end-session');
+        const progCont = document.getElementById('progress-container');
+
+        if (mode === 'sim') {
+            if (db.length === 0) { alert("Database vuoto!"); return; }
+            session.queue = [...db].sort(() => 0.5 - Math.random()).slice(0, 30);
+            lbl.innerText = "ESAME"; lbl.style.color = "var(--primary)";
+            startTimer(); endBtn.style.display = "none"; progCont.style.opacity = "1";
+        } else if (mode === 'studio') {
+            session.queue = db.filter(q => q.cat === catId).sort(() => 0.5 - Math.random());
+            lbl.innerText = catTitle; lbl.style.color = "#F59E0B";
+            stopTimer(); endBtn.style.display = "block"; progCont.style.opacity = "0";
+        } else if (mode === 'review') {
+            session.queue = db.filter(q => userStats.errorsBank.includes(q.id));
+            lbl.innerText = "RIPASSO"; lbl.style.color = "var(--error)";
+            stopTimer(); endBtn.style.display = "block"; progCont.style.opacity = "1";
+        }
+        if (session.queue.length === 0) { alert("Nessuna domanda disponibile!"); return; }
+        setupUI(); showView('view-quiz'); loadQuestion();
+    }
+    function setupUI() {
+        document.getElementById('ans-area').style.pointerEvents = 'auto';
+        document.getElementById('expl-box').style.display = 'none';
+        document.getElementById('btn-next').style.display = 'none';
+        document.querySelectorAll('.ans-btn').forEach(b => { b.className = "ans-btn"; b.style.opacity = "1"; });
+    }
+    function loadQuestion() {
+        const q = session.queue[session.index];
+        setupUI();
+        if (session.mode === 'studio') { document.getElementById('quiz-counter').innerText = `Domanda n. ${session.index + 1}`; }
+        else {
+            document.getElementById('quiz-counter').innerText = `${session.index + 1} / ${session.queue.length}`;
+            document.getElementById('progress').style.width = `${(session.index / session.queue.length) * 100}%`;
+        }
+        document.getElementById('q-text').innerText = q.text;
+        const imgBox = document.getElementById('img-box');
+        if (q.fig) { imgBox.style.display = 'flex'; imgBox.innerHTML = `<img src="img/fig_${q.fig}.jpg" onerror="this.style.display='none'">`; }
+        else { imgBox.style.display = 'none'; }
+    }
+    function submitAnswer(userVal) {
+        const q = session.queue[session.index];
+        const isCorrect = (userVal === q.vero);
+        const btns = document.querySelectorAll('.ans-btn');
+        if (isCorrect) {
+            session.score++;
+            if (session.mode === 'review') {
+                userStats.errorsBank = userStats.errorsBank.filter(id => id !== q.id);
+                localStorage.setItem('patenteMasterApp', JSON.stringify(userStats));
+            }
+        } else {
+            session.errors++;
+            if (!userStats.errorsBank.includes(q.id)) {
+                userStats.errorsBank.push(q.id);
+                localStorage.setItem('patenteMasterApp', JSON.stringify(userStats));
+            }
+        }
+        if (session.mode === 'sim') { nextQuestion(); return; }
+        document.getElementById('ans-area').style.pointerEvents = 'none';
+        if (userVal === true) {
+            btns[0].classList.add(isCorrect ? 'selected-true' : 'selected-false'); btns[1].classList.add('dimmed');
+        } else {
+            btns[1].classList.add(isCorrect ? 'selected-true' : 'selected-false'); btns[0].classList.add('dimmed');
+        }
+        document.getElementById('expl-text').innerHTML = (isCorrect ? "<b style='color:var(--success)'>Esatto!</b> " : "<b style='color:var(--error)'>Errore.</b> ") + (q.expl || "");
+        document.getElementById('expl-box').style.display = 'block';
+        setTimeout(() => { document.getElementById('btn-next').style.display = 'block'; document.getElementById('btn-next').scrollIntoView({ behavior: 'smooth' }); }, 100);
+    }
+    function nextQuestion() {
+        session.index++;
+        if (session.index < session.queue.length) { loadQuestion(); } else { endSession(); }
+    }
+    function endSession() {
+        stopTimer();
+        if (session.mode === 'sim') {
+            userStats.totalExams++;
+            const passed = session.errors <= 3;
+            if(passed) userStats.passedExams++;
+            userStats.history.unshift(passed ? 'pass' : 'fail');
+            if(userStats.history.length > 5) userStats.history.pop();
+            localStorage.setItem('patenteMasterApp', JSON.stringify(userStats));
+            document.getElementById('res-score-val').innerText = session.errors;
+            document.getElementById('res-score-label').innerText = "Errori";
+            const circle = document.getElementById('res-circle-bg');
+            circle.style.borderColor = passed ? "var(--success)" : "var(--error)";
+            circle.style.backgroundColor = passed ? "#ECFDF5" : "#FEF2F2";
+            document.getElementById('res-score-val').style.color = passed ? "var(--success)" : "var(--error)";
+            document.getElementById('res-msg').innerText = passed ? "IDONEO" : "NON IDONEO";
+            document.getElementById('res-msg').style.color = passed ? "var(--success)" : "var(--error)";
+            document.getElementById('res-sub').innerText = passed ? "Ottimo lavoro!" : "Troppi errori (Max 3).";
+        } else {
+            document.getElementById('res-score-val').innerText = session.score;
+            document.getElementById('res-score-label').innerText = "Risposte Esatte";
+            const circle = document.getElementById('res-circle-bg');
+            circle.style.borderColor = "var(--primary)";
+            circle.style.backgroundColor = "#EFF6FF";
+            document.getElementById('res-score-val').style.color = "var(--primary)";
+            document.getElementById('res-msg').innerText = "Terminato";
+            document.getElementById('res-msg').style.color = "var(--text-main)";
+            document.getElementById('res-sub').innerText = `Hai risposto a ${session.index} domande.`;
+        }
+        showView('view-result');
+    }
+</script>
+</body>
+</html>
