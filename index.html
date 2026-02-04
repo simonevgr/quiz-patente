@@ -38,6 +38,18 @@
         .welcome-title { font-size: 24px; font-weight: 800; color: var(--text-main); margin: 0 0 5px 0; letter-spacing: -0.5px; }
         .welcome-sub { color: var(--text-sec); font-size: 14px; margin: 0; }
 
+        /* MODALE ISTRUZIONI (iOS/Android Manuale) */
+        .info-modal {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6); z-index: 1000; justify-content: center; align-items: center;
+            padding: 20px;
+        }
+        .info-content {
+            background: white; padding: 25px; border-radius: 20px; text-align: center; max-width: 320px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2); animation: slideUp 0.3s ease;
+        }
+        .info-icon { font-size: 40px; margin-bottom: 10px; }
+
         /* STATS */
         .stats-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
         .stat-box { background: white; padding: 15px; border-radius: 16px; border: 1px solid #E5E7EB; box-shadow: 0 2px 5px rgba(0,0,0,0.02); display: flex; flex-direction: column; justify-content: center; }
@@ -60,50 +72,84 @@
         .mode-card.disabled { opacity: 0.6; pointer-events: none; filter: grayscale(1); }
         .err-badge { position: absolute; right: 15px; top: 15px; background: var(--error); color: white; font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 10px; }
 
-        /* MODALE ISTRUZIONI */
-        .info-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1000; justify-content: center; align-items: center; padding: 20px; }
-        .info-content { background: white; padding: 25px; border-radius: 20px; text-align: center; max-width: 320px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); animation: slideUp 0.3s ease; }
+        /* CARD INSTALLAZIONE SPECIALE */
+        .install-card { 
+            background: linear-gradient(135deg, #10B981, #059669); 
+            border: none; 
+            color: white; 
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+        }
+        .install-card:hover { border-color: transparent; transform: translateY(-2px); }
+        .install-card .mode-icon { background: rgba(255,255,255,0.2); color: white; }
+        .install-card div div { color: white !important; }
 
-        /* QUIZ UI */
+        /* QUIZ HEADER & TIMER */
         .quiz-header { display: flex; justify-content: space-between; align-items: center; font-size: 13px; color: var(--text-sec); margin-bottom: 10px; font-weight: 500; height: 30px; }
         .timer-box { font-family: 'Courier New', monospace; font-weight: 700; font-size: 15px; color: var(--text-main); background: #F3F4F6; padding: 4px 8px; border-radius: 6px; display: none; }
-        .progress-bar { height: 4px; background: #E5E7EB; border-radius: 2px; margin-bottom: 15px; overflow: hidden; }
+        .timer-box.urgent { color: var(--error); background: #FEE2E2; animation: pulse 1s infinite; }
+        .end-btn { font-size: 11px; font-weight: 600; color: var(--error); background: #FEF2F2; padding: 5px 10px; border-radius: 20px; border: 1px solid #FEE2E2; cursor: pointer; display: none; }
+
+        .progress-bar { height: 4px; background: #E5E7EB; border-radius: 2px; margin-bottom: 15px; overflow: hidden; opacity: 1; transition: opacity 0.3s; }
         .progress-fill { height: 100%; background: var(--primary); width: 0%; transition: width 0.3s; }
-        .image-box { width: 100%; height: 160px; background: #fff; border: 1px solid #E5E7EB; border-radius: 12px; margin-bottom: 15px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+        
+        /* QUIZ CONTENT */
+        .image-box { width: 100%; height: 160px; background: #fff; border: 1px solid #E5E7EB; border-radius: 12px; margin-bottom: 15px; display: flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0; }
         .image-box img { width: 100%; height: 100%; object-fit: contain; }
-        .question { font-size: 17px; font-weight: 600; line-height: 1.5; margin-bottom: 20px; flex: 1; color: var(--text-main); }
-        .btn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: auto; }
-        .ans-btn { padding: 16px; border-radius: 12px; border: 2px solid #E5E7EB; background: white; font-weight: 700; font-size: 16px; cursor: pointer; transition: 0.1s; }
+        
+        .question { font-size: 17px; font-weight: 600; line-height: 1.5; margin-bottom: 20px; flex: 1; color: var(--text-main); overflow-y: auto; }
+        
+        .btn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: auto; flex-shrink: 0; }
+        .ans-btn { padding: 16px; border-radius: 12px; border: 2px solid #E5E7EB; background: white; font-weight: 700; font-size: 16px; cursor: pointer; transition: 0.1s; color: var(--text-main); }
+        .ans-btn:active { transform: scale(0.98); }
         .ans-btn.selected-true { background: #ECFDF5; border-color: var(--success); color: var(--success); }
         .ans-btn.selected-false { background: #FEF2F2; border-color: var(--error); color: var(--error); }
         .ans-btn.dimmed { opacity: 0.4; pointer-events: none; }
-        .explanation { background: var(--info-bg); color: var(--info-text); padding: 12px; border-radius: 10px; margin-top: 15px; font-size: 13px; line-height: 1.4; border-left: 4px solid #0EA5E9; display: none; }
+
+        .explanation { background: var(--info-bg); color: var(--info-text); padding: 12px; border-radius: 10px; margin-top: 15px; font-size: 13px; line-height: 1.4; border-left: 4px solid #0EA5E9; display: none; animation: slideUp 0.3s; }
+        
+        /* NAV BUTTONS AREA */
         .nav-area { display: flex; gap: 10px; margin-top: 15px; }
-        .nav-btn { flex: 1; padding: 14px; border-radius: 12px; font-weight: 600; font-size: 15px; border: none; cursor: pointer; }
+        .nav-btn { flex: 1; padding: 14px; border-radius: 12px; font-weight: 600; font-size: 15px; border: none; cursor: pointer; transition: 0.2s; }
+        .btn-prev { background: #F3F4F6; color: var(--text-sec); display: none; } 
+        .btn-next { background: var(--text-main); color: white; box-shadow: 0 4px 10px rgba(0,0,0,0.1); display: none; } 
 
         /* RESULTS */
         .res-circle { width: 120px; height: 120px; border-radius: 50%; background: #E5E7EB; margin: 0 auto 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; border: 5px solid white; box-shadow: 0 10px 20px rgba(0,0,0,0.05); }
-        .res-score { font-size: 36px; font-weight: 800; }
+        .res-score { font-size: 36px; font-weight: 800; color: var(--text-main); line-height: 1; }
+        .res-label { font-size: 11px; color: var(--text-sec); text-transform: uppercase; margin-top: 5px; font-weight: 600; }
+        
         .chapter-grid { display: grid; grid-template-columns: 1fr; gap: 10px; }
-        .chapter-card { background: white; border: 1px solid #E5E7EB; padding: 15px; border-radius: 12px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
+        .chapter-card { background: white; border: 1px solid #E5E7EB; padding: 15px; border-radius: 12px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: 0.2s; }
+        .chapter-card:hover { border-color: var(--primary); background: var(--primary-light); }
 
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         @keyframes slideUp { from { transform: translateY(10px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+        .hidden { display: none !important; }
     </style>
 </head>
 <body>
 
 <div class="app-shell">
     <div class="header">
-        <button class="home-btn" onclick="goHome()">🏠</button>
+        <button class="home-btn" onclick="goHome()" title="Home">🏠</button>
         <div class="brand">Guida<span style="color:#2563EB">Facile</span></div>
         <div style="width: 36px;"></div> 
     </div>
 
     <div id="view-home" class="view active">
+        <div id="install-instruction-modal" class="info-modal" onclick="this.style.display='none'">
+            <div class="info-content">
+                <div class="info-icon" id="modal-icon">📲</div>
+                <h3 style="margin-top:0;" id="modal-title">Installa l'App</h3>
+                <p id="modal-text" style="font-size:14px; text-align:left; line-height:1.5;">...</p>
+                <button style="background:#2563EB; color:white; border:none; padding:10px 20px; border-radius:10px; margin-top:10px;">Ho capito</button>
+            </div>
+        </div>
+
         <div class="welcome-header">
             <h1 class="welcome-title" id="welcome-msg">Benvenuto</h1>
-            <p class="welcome-sub">La tua preparazione all'esame Patente B.</p>
+            <p class="welcome-sub">La tua dashboard di preparazione all'esame.</p>
         </div>
 
         <div class="stats-row">
@@ -119,16 +165,18 @@
 
         <div class="history-container">
             <span class="history-label">Trend Recente</span>
-            <div class="history-dots" id="history-dots"></div>
+            <div class="history-dots" id="history-dots">
+                <div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div>
+            </div>
         </div>
 
         <div class="section-title">MODALITÀ DI STUDIO</div>
 
         <div class="mode-card" onclick="startSession('sim')">
-            <div class="mode-icon">⏱️</div>
+            <div class="mode-icon" style="background: #EFF6FF; color: var(--primary);">⏱️</div>
             <div>
                 <div style="font-weight: 700; font-size: 15px;">Simulazione Esame</div>
-                <div style="font-size: 12px; color: var(--text-sec);">30 Quiz • 30 Minuti • 3 Errori max</div>
+                <div style="font-size: 12px; color: var(--text-sec);">30 Quiz • 30 Minuti • Come l'ufficiale</div>
             </div>
         </div>
 
@@ -136,7 +184,7 @@
             <div class="mode-icon" style="background: #FFFBEB; color: #F59E0B;">🎓</div>
             <div>
                 <div style="font-weight: 700; font-size: 15px;">Studio per Argomento</div>
-                <div style="font-size: 12px; color: var(--text-sec);">Esercitati su capitoli specifici</div>
+                <div style="font-size: 12px; color: var(--text-sec);">Scegli un capitolo specifico</div>
             </div>
         </div>
 
@@ -145,24 +193,34 @@
             <div class="mode-icon" style="background: #FEF2F2; color: var(--error);">❤️‍🩹</div>
             <div>
                 <div style="font-weight: 700; font-size: 15px;">Ripasso Errori</div>
-                <div style="font-size: 12px; color: var(--text-sec);">Rifai i quiz che hai sbagliato</div>
+                <div style="font-size: 12px; color: var(--text-sec);">Rivedi i quiz sbagliati in passato</div>
+            </div>
+        </div>
+
+        <div id="install-card-section" class="mode-card install-card" onclick="triggerInstall()" style="margin-top: 25px;">
+            <div class="mode-icon">📲</div>
+            <div>
+                <div style="font-weight: 700; font-size: 15px;">Scarica l'App</div>
+                <div style="font-size: 12px; opacity: 0.9;">Installa per usare offline e a schermo intero</div>
             </div>
         </div>
         
-        <div style="text-align: center; margin-top: 20px;">
-             <button onclick="resetData()" style="background:none; border:none; color:#9CA3AF; font-size:11px; cursor:pointer; text-decoration: underline;">Reset Progressi</button>
+        <div style="text-align: center; margin-top: 20px; padding-bottom: 20px;">
+             <button onclick="resetData()" style="background:none; border:none; color:#9CA3AF; font-size:11px; cursor:pointer; text-decoration: underline;">Reset Dati e Progressi</button>
         </div>
     </div>
 
     <div id="view-chapters" class="view">
         <h2 style="margin-top: 0; font-size: 18px;">Argomenti Studio</h2>
+        <p style="color:var(--text-sec); font-size:13px; margin-bottom:20px;">Seleziona una categoria per iniziare.</p>
         <div id="chapters-list" class="chapter-grid"></div>
     </div>
 
     <div id="view-quiz" class="view">
         <div class="quiz-header">
-            <span id="quiz-mode-label" style="text-transform: uppercase; font-weight: 700; color: var(--primary); font-size:11px;">ESAME</span>
+            <span id="quiz-mode-label" style="text-transform: uppercase; font-weight: 700; color: var(--primary); font-size:11px; max-width: 40%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">SIMULAZIONE</span>
             <div class="timer-box" id="timer-display">30:00</div>
+            <button class="end-btn" id="btn-end-session" onclick="endSession()">Termina</button>
             <span id="quiz-counter" style="font-size:11px; font-weight:600;">1 / 30</span>
         </div>
         <div class="progress-bar" id="progress-container"><div class="progress-fill" id="progress"></div></div>
@@ -181,25 +239,31 @@
         </div>
 
         <div class="nav-area">
-            <button class="nav-btn" style="background:#F3F4F6; color:var(--text-sec); display:none;" id="btn-prev" onclick="prevQuestion()">⬅️ Indietro</button>
-            <button class="nav-btn" style="background:var(--text-main); color:white; display:none;" id="btn-next" onclick="nextQuestion()">Prossima ➜</button>
+            <button class="nav-btn btn-prev" id="btn-prev" onclick="prevQuestion()">⬅️ Indietro</button>
+            <button class="nav-btn btn-next" id="btn-next" onclick="nextQuestion()">Prossima ➜</button>
         </div>
     </div>
 
     <div id="view-result" class="view" style="text-align: center;">
-        <h2 style="margin-bottom: 25px;">Risultato</h2>
+        <h2 style="margin-bottom: 25px; margin-top: 10px;">Risultato Esame</h2>
         <div class="res-circle" id="res-circle-bg">
             <span class="res-score" id="res-score-val">--</span>
-            <span style="font-size:11px; font-weight:600; color:var(--text-sec);" id="res-score-label">Errori</span>
+            <span class="res-label" id="res-score-label">Errori</span>
         </div>
-        <h3 id="res-msg">...</h3>
-        <p id="res-sub" style="color: var(--text-sec); font-size: 14px; margin-bottom: 40px; line-height: 1.5;">...</p>
-        <button class="nav-btn" style="width:100%; background:var(--primary); color:white;" onclick="goHome()">Torna alla Dashboard</button>
+        <h3 id="res-msg" style="font-size: 22px; margin: 15px 0;">...</h3>
+        <p id="res-sub" style="color: var(--text-sec); font-size: 14px; margin-bottom: 40px; padding: 0 20px; line-height: 1.5;">...</p>
+        <button class="nav-btn btn-next" style="display: block; width: 100%; background: var(--primary);" onclick="goHome()">Torna alla Dashboard</button>
     </div>
+
 </div>
 
 <script>
-    // DATABASE QUIZ (Stessi dati forniti)
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('sw.js');
+        });
+    }
+
     const db = [
       /* Blocco 11023: Ciclomotori */
   { id: 1, text: "I veicoli a due ruote, con motore termico fino a 50 cm3 di cilindrata e velocità massima di 45 km/h sono ciclomotori", vero: true, fig: null, cat: "veicoli", expl: "Questa è la definizione tecnica corretta di ciclomotore. Se un veicolo a due ruote supera questi limiti di cilindrata o velocità, viene automaticamente classificato come motociclo." },
@@ -301,8 +365,105 @@
   { id: 49, text: "In un passaggio a livello si possono trovare le barriere", vero: true, fig: null, cat: "veicoli", expl: "Vero. Possono essere presenti barriere totali o semibarriere, accompagnate da dispositivi a luce rossa e segnali acustici che vietano il transito all'arrivo del treno." },
   { id: 50, text: "Il passaggio a livello è un cavalcavia ferroviario o tranviario", vero: false, fig: null, cat: "veicoli", expl: "Falso. Il passaggio a livello è per definizione un incrocio allo stesso livello (piano). Un cavalcavia ferroviario è invece un'opera a livelli sfalsati dove non c'è contatto tra binari e strada." },
 
-/* Blocco 11006: Isola di traffico */ { id: 51, text: "L'isola di traffico serve a facilitare l'incanalamento dei veicoli verso varie direzioni", vero: true, fig: null, cat: "veicoli", expl: "L'affermazione è corretta. L'isola di traffico è una parte della strada, opportunamente segnalata, che ha lo scopo di guidare i flussi di traffico verso le diverse direzioni consentite dall'ente proprietario." }, { id: 52, text: "L'isola di traffico serve a separare la carreggiata dalla banchina", vero: false, fig: null, cat: "veicoli", expl: "Questa affermazione è falsa. L'isola di traffico serve a canalizzare le correnti di traffico, non a separare la carreggiata dalla banchina; tale funzione è svolta solitamente dalle strisce di margine." }, /* Blocco 11009: Zona a traffico limitato */ { id: 53, text: "Una zona a traffico limitato è un'area in cui può essere limitata la circolazione dei veicoli solo in alcune ore", vero: true, fig: null, cat: "veicoli", expl: "Vero. La zona a traffico limitato (ZTL) è un'area urbana dove l'accesso è regolamentato e limitato a determinate categorie di veicoli o utenti, spesso con restrizioni orarie specifiche." }, { id: 54, text: "In una zona a traffico limitato non possono entrare più di un certo numero di veicoli", vero: false, fig: null, cat: "veicoli", expl: "Falso. La ZTL limita l'accesso in base alla categoria del veicolo o all'autorizzazione del conducente, non in base al numero complessivo di mezzi presenti contemporaneamente nell'area." }, /* Blocco 11011: Area pedonale */ { id: 55, text: "Nelle aree pedonali possono transitare i veicoli ad emissione zero (elettrici), se espressamente consentito", vero: true, fig: null, cat: "veicoli", expl: "Vero. Se indicato dalla segnaletica, i veicoli elettrici possono avere il permesso di circolare nelle aree pedonali, sebbene queste siano primariamente riservate ai pedoni e alle biciclette." }, { id: 56, text: "Nelle aree pedonali possono transitare tutti i motocicli, purché diano la precedenza ai pedoni", vero: false, fig: null, cat: "veicoli", expl: "Falso. Ai motocicli è normalmente vietato l'accesso alle aree pedonali. Solo specifiche categorie autorizzate o mezzi di emergenza possono entrare, sempre con la massima cautela." }, /* Blocco 11021: Salvagente */ { id: 57, text: "Il salvagente, posto in corrispondenza di attraversamenti pedonali, serve anche al riparo o alla sosta dei pedoni che attraversano la strada", vero: true, fig: null, cat: "veicoli", expl: "Vero. Il salvagente è una struttura rialzata o delimitata che protegge i pedoni durante l'attraversamento o facilita la salita e la discesa dai mezzi di trasporto pubblico come il tram." }, { id: 58, text: "Il salvagente serve a dividere i sensi di marcia in una strada a doppio senso di circolazione", vero: false, fig: null, cat: "veicoli", expl: "Falso. La funzione di dividere i sensi di marcia spetta allo spartitraffico o alla segnaletica orizzontale. Il salvagente ha lo scopo primario di tutelare la sicurezza dei pedoni." }, /* Blocco 12001: Strada deformata */ { id: 59, text: "Il segnale raffigurato preannuncia un tratto di strada deformata", vero: true, fig: 1, cat: "pericolo", expl: "Vero. Il segnale di pericolo 'strada deformata' indica un fondo stradale in cattivo stato o dissestato. Impone di moderare la velocità per evitare danni alle sospensioni e mantenere il controllo." }, { id: 60, text: "Il segnale raffigurato è un segnale di prescrizione", vero: false, fig: 1, cat: "pericolo", expl: "Falso. Questo è un segnale di pericolo, riconoscibile dalla sua forma triangolare con il vertice verso l'alto. I segnali di prescrizione hanno invece forma circolare." }, /* Blocco 12002: Strada deformata (comportamento) */ { id: 61, text: "In presenza del segnale raffigurato è importante prevedere eventuali sbandamenti dei veicoli provenienti dal senso opposto", vero: true, fig: 1, cat: "pericolo", expl: "Vero. Su una strada deformata, le asperità del fondo possono causare deviazioni impreviste della traiettoria dei veicoli. È necessario essere pronti a reagire a possibili sbandamenti altrui." }, { id: 62, text: "In presenza del segnale raffigurato è obbligatorio circolare al centro della carreggiata", vero: false, fig: 1, cat: "pericolo", expl: "Falso. Nonostante la strada sia deformata, è obbligatorio circolare il più possibile vicino al margine destro della carreggiata per non intralciare i veicoli che provengono dal senso opposto." }, /* Blocco 12003: Dosso */ { id: 63, text: "Il segnale raffigurato preannuncia un dosso", vero: true, fig: 2, cat: "pericolo", expl: "Vero. Il segnale preavvisa una variazione di pendenza della strada (salita seguita da discesa) che limita la visibilità. Richiede prudenza e il rispetto dei divieti di sorpasso e sosta." }, { id: 64, text: "Il segnale raffigurato preannuncia una cunetta", vero: false, fig: 2, cat: "pericolo", expl: "Falso. Il segnale raffigurato indica un dosso. La cunetta è invece un tratto di strada che prima scende e poi sale, rappresentato da un simbolo con la concavità rivolta verso l'alto." }, /* Blocco 12004: Dosso (comportamento) */ { id: 65, text: "In presenza del segnale raffigurato è necessario moderare la velocità in relazione alla visibilità", vero: true, fig: 2, cat: "pericolo", expl: "Vero. Trattandosi di un dosso, la visibilità è ridotta nel tratto in salita. È fondamentale regolare la velocità per potersi arrestare prontamente in caso di ostacoli imprevisti." }, { id: 66, text: "Il segnale raffigurato vieta il transito degli autobus", vero: false, fig: 2, cat: "pericolo", expl: "Falso. Il segnale di dosso riguarda la conformazione della strada e non impone divieti di transito specifici per categorie di veicoli. Gli autobus possono circolare regolarmente." }, /* Blocco 12005: Cunetta */ { id: 67, text: "Il segnale raffigurato preannuncia una cunetta", vero: true, fig: 3, cat: "pericolo", expl: "Vero. Il segnale indica un tratto di strada pericoloso caratterizzato da una discesa seguita da una salita. Può essere soggetto ad allagamenti in caso di pioggia intensa." }, { id: 68, text: "Il segnale raffigurato indica una banchina cedevole", vero: false, fig: 3, cat: "pericolo", expl: "Falso. Il simbolo indica una cunetta. La banchina cedevole è segnalata da un diverso cartello che raffigura un'auto inclinata che rischia di scivolare fuori dal piano stradale." }, /* Blocco 12006: Cunetta (comportamento) */ { id: 69, text: "In presenza del segnale raffigurato è necessario moderare la velocità per evitare danni alle sospensioni", vero: true, fig: 3, cat: "pericolo", expl: "Vero. Attraversare una cunetta a velocità elevata può causare forti sollecitazioni meccaniche al veicolo e la perdita di controllo a causa del sobbalzo delle ruote." }, { id: 70, text: "In presenza del segnale raffigurato è necessario rallentare solo se provengono veicoli dal senso opposto", vero: false, fig: 3, cat: "pericolo", expl: "Falso. La velocità deve essere moderata in ogni caso per preservare l'integrità del veicolo e garantire la sicurezza, indipendentemente dalla presenza di altri utenti sulla strada." }, /* Blocco 12007: Curva pericolosa a destra */ { id: 71, text: "Il segnale raffigurato preannuncia una curva pericolosa a destra", vero: true, fig: 4, cat: "pericolo", expl: "Vero. Preavvisa un tratto di strada non rettilineo con visibilità limitata verso destra. Richiede di regolare la velocità in base al raggio della curva e alle condizioni meteorologiche." }, { id: 72, text: "Il segnale raffigurato preannuncia una serie di curve pericolose di cui la prima a destra", vero: false, fig: 4, cat: "pericolo", expl: "Falso. Il segnale raffigurato indica una singola curva pericolosa. Per una serie di curve si utilizza un simbolo con una doppia freccia che indica anche la direzione della prima curva." }, /* Blocco 12008: Curva pericolosa a destra (comportamento) */ { id: 73, text: "In presenza del segnale raffigurato, posto su strada a doppio senso di circolazione e con due sole corsie, si deve circolare il più possibile vicino al margine destro", vero: true, fig: 4, cat: "pericolo", expl: "Vero. Questa norma di comportamento è essenziale nelle curve con visibilità limitata per evitare collisioni frontali con veicoli provenienti dal senso opposto che potrebbero invadere la corsia." }, { id: 74, text: "Il segnale raffigurato preannuncia un tratto di strada a due corsie e doppio senso di circolazione in cui è consentito sorpassare i motocicli, senza superare la striscia bianca continua", vero: false, fig: 4, cat: "pericolo", expl: "Falso. Nelle curve pericolose su strade a due sole corsie e doppio senso, il sorpasso è sempre vietato, anche se la manovra potrebbe teoricamente compiersi entro la semicarreggiata." }, /* Blocco 12009: Curva pericolosa a sinistra */ { id: 75, text: "La figura rappresenta un segnale di pericolo", vero: true, fig: 5, cat: "pericolo", expl: "Vero. La forma triangolare con bordo rosso e il simbolo nero all'interno sono le caratteristiche distintive dei segnali di pericolo, che avvertono gli utenti di una situazione critica imminente." }, { id: 76, text: "La figura rappresenta un segnale di obbligo", vero: false, fig: 5, cat: "pericolo", expl: "Falso. Il segnale di curva pericolosa a sinistra è un segnale di pericolo. I segnali di obbligo sono invece di forma circolare a fondo blu con simboli bianchi." }, /* Blocco 12010: Curva pericolosa a sinistra (comportamento) */ { id: 77, text: "In presenza del segnale raffigurato, su una strada a doppio senso di circolazione con due sole corsie, si deve circolare il più possibile vicino al margine destro", vero: true, fig: 5, cat: "pericolo", expl: "Vero. La prudenza impone di stringere il margine destro per garantire la sicurezza del traffico opposto, specialmente in tratti non rettilinei dove la visibilità è spesso compromessa." }, 
-{ id: 78, text: "In presenza del segnale raffigurato, su strada a senso unico di circolazione si deve marciare il più possibile vicino al margine destro della carreggiata", vero: false, fig: 5, cat: "pericolo", expl: "Falso. Sulle strade a senso unico non c'è il rischio di scontro frontale, pertanto la manovra può essere affrontata con traiettorie più agevoli, pur restando all'interno della corsia scelta." }, /* Blocco 12011: Doppia curva pericolosa, la prima a destra */ { id: 79, text: "Il segnale raffigurato preannuncia una doppia curva pericolosa, la prima a destra", vero: true, fig: 6, cat: "pericolo", expl: "Vero. Il simbolo indica una successione di curve ravvicinate. La direzione della prima freccia rivolta verso destra specifica l'andamento iniziale del tratto pericoloso segnalato." }, { id: 80, text: "Il segnale raffigurato preannuncia una deviazione per lavori in corso", vero: false, fig: 6, cat: "pericolo", expl: "Falso. Il segnale indica una doppia curva pericolosa. Per i lavori in corso si utilizza un segnale triangolare a fondo giallo che raffigura un operaio al lavoro." }, /* Blocco 12012: Doppia curva pericolosa, la prima a destra (comportamento) */ { id: 81, text: "Su strada a due sole corsie e a doppio senso di circolazione, in presenza del segnale raffigurato si deve marciare il più possibile vicino al margine destro", vero: true, fig: 6, cat: "pericolo", expl: "Vero. Nelle doppie curve con visibilità ridotta, occupare il margine destro è fondamentale per prevenire incidenti con chi proviene di fronte, che potrebbe sbandare a causa della forza centrifuga." }, { id: 82, text: "Il segnale raffigurato preannuncia un tratto di strada in cui è consentita l'inversione di marcia", vero: false, fig: 6, cat: "pericolo", expl: "Falso. In presenza di curve pericolose e visibilità limitata, la manovra di inversione del senso di marcia è severamente vietata per l'elevato rischio di provocare collisioni gravi." }, /* Blocco 12013: Doppia curva pericolosa, la prima a sinistra */ { id: 83, text: "Il segnale raffigurato preannuncia una doppia curva pericolosa, la prima a sinistra", vero: true, fig: 7, cat: "pericolo", expl: "Vero. Il segnale avverte di una successione di curve dove la prima svolta è verso sinistra. È necessario moderare la velocità e prepararsi ad affrontare il cambio di direzione." }, { id: 84, text: "Il segnale raffigurato preannuncia una strettoia", vero: false, fig: 7, cat: "pericolo", expl: "Falso. Il simbolo indica esclusivamente un andamento tortuoso della strada (doppia curva). Le strettoie sono indicate da segnali con linee nere che si restringono verso il centro." }, /* Blocco 12014: Doppia curva pericolosa, la prima a sinistra (comportamento) */ { id: 85, text: "In presenza del segnale raffigurato si deve circolare il più possibile vicino al margine destro della carreggiata, su strada a due sole corsie e a doppio senso di circolazione", vero: true, fig: 7, cat: "pericolo", expl: "Vero. Come per tutte le curve pericolose su strade a doppio senso, mantenersi a destra garantisce la sicurezza necessaria in caso di incrocio con altri veicoli non visibili." }, { id: 86, text: "In presenza del segnale raffigurato è consentita l'inversione di marcia", vero: false, fig: 7, cat: "pericolo", expl: "Falso. L'inversione di marcia è vietata in corrispondenza e in prossimità delle curve pericolose a causa della mancanza di visibilità sufficiente per compiere la manovra senza pericolo." }, /* Blocco 12015: Passaggio a livello con barriere o semibarriere */ { id: 87, text: "Il segnale raffigurato preannuncia un passaggio a livello con barriere o con semibarriere", vero: true, fig: 8, cat: "pericolo", expl: "Vero. Il simbolo della cancellata indica che l'attraversamento ferroviario è protetto da dispositivi di chiusura fisici. È obbligatorio moderare la velocità e prepararsi all'arresto." }, { id: 88, text: "Il segnale raffigurato preannuncia l'incrocio con una linea tranviaria", vero: false, fig: 8, cat: "pericolo", expl: "Falso. Il segnale riguarda i passaggi a livello ferroviari. Gli incroci con linee tranviarie sono segnalati da un cartello triangolare che raffigura esplicitamente un tram." }, /* Blocco 12016: Passaggio a livello con barriere o semibarriere (comportamento) */ { id: 89, text: "In presenza del segnale raffigurato è necessario moderare la velocità per essere pronti ad arrestarsi se le barriere sono chiuse", vero: true, fig: 8, cat: "pericolo", expl: "Vero. Avvicinandosi a un passaggio a livello protetto, bisogna essere pronti a fermarsi in sicurezza qualora le segnalazioni luminose rosse o acustiche indichino l'arrivo del treno." }, { id: 90, text: "In presenza del segnale raffigurato è consentito sostare in corrispondenza o in prossimità dei passaggi a livelli", vero: false, fig: 8, cat: "pericolo", expl: "Falso. La sosta e la fermata sono sempre vietate in corrispondenza e in prossimità dei binari ferroviari poiché costituirebbero un gravissimo intralcio e pericolo per la circolazione dei treni." }, /* Blocco 12017: Passaggio a livello senza barriere */ { id: 91, text: "Il segnale raffigurato preannuncia un attraversamento ferroviario a livello senza barriere", vero: true, fig: 9, cat: "pericolo", expl: "Vero. Il simbolo della locomotiva a vapore indica un passaggio a livello privo di protezioni fisiche. Richiede la massima allerta visiva e uditiva per verificare l'arrivo di treni." }, { id: 92, text: "Il segnale raffigurato indica l'incrocio con una linea tranviaria", vero: false, fig: 9, cat: "pericolo", expl: "Falso. Il segnale avverte della presenza di binari ferroviari e non tranviari. La distinzione è importante per le diverse regole di precedenza e comportamento da adottare." }, /* Blocco 12018: Passaggio a livello senza barriere (comportamento) */ { id: 93, text: "In presenza del segnale raffigurato è necessario rallentare in relazione alla visibilità della linea ferroviaria", vero: true, fig: 9, cat: "pericolo", expl: "Vero. Trattandosi di un passaggio a livello incustodito, la sicurezza dipende dalla capacità del conducente di osservare i binari. La velocità deve permettere l'arresto immediato." }, { id: 94, text: "In presenza del segnale raffigurato è necessario rallentare esclusivamente in caso di nebbia", vero: false, fig: 9, cat: "pericolo", expl: "Falso. È obbligatorio rallentare sempre quando ci si approssima a un passaggio a livello senza barriere, indipendentemente dalle condizioni meteo, per garantire un attraversamento sicuro." }, /* Blocco 12019: Croce di S. Andrea */ { id: 95, text: "Il segnale raffigurato indica che la sede ferroviaria ha un solo binario", vero: true, fig: 10, cat: "pericolo", expl: "Vero. La croce di Sant'Andrea singola è posta nelle immediate vicinanze dei binari e specifica che la linea ferroviaria è composta da un unico binario di marcia." }, { id: 96, text: "Il segnale raffigurato preannuncia una sede ferroviaria con più binari", vero: false, fig: 10, cat: "pericolo", expl: "Falso. La croce singola indica un solo binario. In presenza di due o più binari si utilizza la doppia croce di Sant'Andrea, che presenta due elementi a X sovrapposti." }, /* Blocco 12020: Doppia croce di S. Andrea */ { id: 97, text: "Il segnale raffigurato impone di arrestarsi entro la striscia di arresto, se è in arrivo il treno", vero: true, fig: 11, cat: "pericolo", expl: "Vero. Posto vicino ai binari, il segnale di doppia croce di Sant'Andrea indica un attraversamento senza barriere con più binari, dove l'arresto è obbligatorio all'arrivo del convoglio." }, { id: 98, text: "Il segnale raffigurato è posto, di norma, a 150 metri dai binari", vero: false, fig: 11, cat: "pericolo", expl: "Falso. Questo segnale di localizzazione si trova a pochi metri dai binari. Il preavviso a 150 metri è invece costituito dal segnale triangolare di pericolo con il relativo simbolo." }, /* Blocco 12021: Pannelli distanziometrici ai passaggi a livello */ { id: 99, text: "I pannelli raffigurati sono posti prima di qualsiasi tipo di passaggio a livello", vero: true, fig: 13, cat: "pericolo", expl: "Vero. I pannelli distanziometrici servono a scandire l'avvicinamento ai binari (150, 100 e 50 metri) e vengono installati in tutti i passaggi a livello, con o senza barriere." }, { id: 100, text: "I pannelli raffigurati si possono trovare solo se il passaggio a livello è con barriere", vero: false, fig: 13, cat: "pericolo", expl: "Falso. La loro funzione di indicare la distanza dai binari è universale; pertanto sono presenti anche nei passaggi a livello sprovvisti di barriere o semibarriere protettive." },
+/* Blocco 11006: Isola di traffico */ 
+{ id: 51, text: "L'isola di traffico serve a facilitare l'incanalamento dei veicoli verso varie direzioni", vero: true, fig: null, cat: "veicoli", expl: "L'affermazione è corretta. L'isola di traffico è una parte della strada, opportunamente segnalata, che ha lo scopo di guidare i flussi di traffico verso le diverse direzioni consentite dall'ente proprietario." }, 
+{ id: 52, text: "L'isola di traffico serve a separare la carreggiata dalla banchina", vero: false, fig: null, cat: "veicoli", expl: "Questa affermazione è falsa. L'isola di traffico serve a canalizzare le correnti di traffico, non a separare la carreggiata dalla banchina; tale funzione è svolta solitamente dalle strisce di margine." },
+
+ /* Blocco 11009: Zona a traffico limitato */ 
+{ id: 53, text: "Una zona a traffico limitato è un'area in cui può essere limitata la circolazione dei veicoli solo in alcune ore", vero: true, fig: null, cat: "veicoli", expl: "Vero. La zona a traffico limitato (ZTL) è un'area urbana dove l'accesso è regolamentato e limitato a determinate categorie di veicoli o utenti, spesso con restrizioni orarie specifiche." }, 
+{ id: 54, text: "In una zona a traffico limitato non possono entrare più di un certo numero di veicoli", vero: false, fig: null, cat: "veicoli", expl: "Falso. La ZTL limita l'accesso in base alla categoria del veicolo o all'autorizzazione del conducente, non in base al numero complessivo di mezzi presenti contemporaneamente nell'area." }, 
+
+/* Blocco 11011: Area pedonale */ 
+{ id: 55, text: "Nelle aree pedonali possono transitare i veicoli ad emissione zero (elettrici), se espressamente consentito", vero: true, fig: null, cat: "veicoli", expl: "Vero. Se indicato dalla segnaletica, i veicoli elettrici possono avere il permesso di circolare nelle aree pedonali, sebbene queste siano primariamente riservate ai pedoni e alle biciclette." }, 
+{ id: 56, text: "Nelle aree pedonali possono transitare tutti i motocicli, purché diano la precedenza ai pedoni", vero: false, fig: null, cat: "veicoli", expl: "Falso. Ai motocicli è normalmente vietato l'accesso alle aree pedonali. Solo specifiche categorie autorizzate o mezzi di emergenza possono entrare, sempre con la massima cautela." }, 
+
+/* Blocco 11021: Salvagente */ 
+{ id: 57, text: "Il salvagente, posto in corrispondenza di attraversamenti pedonali, serve anche al riparo o alla sosta dei pedoni che attraversano la strada", vero: true, fig: null, cat: "veicoli", expl: "Vero. Il salvagente è una struttura rialzata o delimitata che protegge i pedoni durante l'attraversamento o facilita la salita e la discesa dai mezzi di trasporto pubblico come il tram." }, 
+{ id: 58, text: "Il salvagente serve a dividere i sensi di marcia in una strada a doppio senso di circolazione", vero: false, fig: null, cat: "veicoli", expl: "Falso. La funzione di dividere i sensi di marcia spetta allo spartitraffico o alla segnaletica orizzontale. Il salvagente ha lo scopo primario di tutelare la sicurezza dei pedoni." }, 
+
+/* Blocco 12001: Strada deformata */
+ { id: 59, text: "Il segnale raffigurato preannuncia un tratto di strada deformata", vero: true, fig: 1, cat: "pericolo", expl: "Vero. Il segnale di pericolo 'strada deformata' indica un fondo stradale in cattivo stato o dissestato. Impone di moderare la velocità per evitare danni alle sospensioni e mantenere il controllo." }, 
+{ id: 60, text: "Il segnale raffigurato è un segnale di prescrizione", vero: false, fig: 1, cat: "pericolo", expl: "Falso. Questo è un segnale di pericolo, riconoscibile dalla sua forma triangolare con il vertice verso l'alto. I segnali di prescrizione hanno invece forma circolare." }, 
+
+/* Blocco 12002: Strada deformata (comportamento) */ 
+{ id: 61, text: "In presenza del segnale raffigurato è importante prevedere eventuali sbandamenti dei veicoli provenienti dal senso opposto", vero: true, fig: 1, cat: "pericolo", expl: "Vero. Su una strada deformata, le asperità del fondo possono causare deviazioni impreviste della traiettoria dei veicoli. È necessario essere pronti a reagire a possibili sbandamenti altrui." }, 
+{ id: 62, text: "In presenza del segnale raffigurato è obbligatorio circolare al centro della carreggiata", vero: false, fig: 1, cat: "pericolo", expl: "Falso. Nonostante la strada sia deformata, è obbligatorio circolare il più possibile vicino al margine destro della carreggiata per non intralciare i veicoli che provengono dal senso opposto." }, 
+
+/* Blocco 12003: Dosso */
+ { id: 63, text: "Il segnale raffigurato preannuncia un dosso", vero: true, fig: 2, cat: "pericolo", expl: "Vero. Il segnale preavvisa una variazione di pendenza della strada (salita seguita da discesa) che limita la visibilità. Richiede prudenza e il rispetto dei divieti di sorpasso e sosta." }, 
+{ id: 64, text: "Il segnale raffigurato preannuncia una cunetta", vero: false, fig: 2, cat: "pericolo", expl: "Falso. Il segnale raffigurato indica un dosso. La cunetta è invece un tratto di strada che prima scende e poi sale, rappresentato da un simbolo con la concavità rivolta verso l'alto." }, 
+
+/* Blocco 12004: Dosso (comportamento) */ 
+{ id: 65, text: "In presenza del segnale raffigurato è necessario moderare la velocità in relazione alla visibilità", vero: true, fig: 2, cat: "pericolo", expl: "Vero. Trattandosi di un dosso, la visibilità è ridotta nel tratto in salita. È fondamentale regolare la velocità per potersi arrestare prontamente in caso di ostacoli imprevisti." }, 
+{ id: 66, text: "Il segnale raffigurato vieta il transito degli autobus", vero: false, fig: 2, cat: "pericolo", expl: "Falso. Il segnale di dosso riguarda la conformazione della strada e non impone divieti di transito specifici per categorie di veicoli. Gli autobus possono circolare regolarmente." }, 
+
+/* Blocco 12005: Cunetta */
+ { id: 67, text: "Il segnale raffigurato preannuncia una cunetta", vero: true, fig: 3, cat: "pericolo", expl: "Vero. Il segnale indica un tratto di strada pericoloso caratterizzato da una discesa seguita da una salita. Può essere soggetto ad allagamenti in caso di pioggia intensa." }, 
+{ id: 68, text: "Il segnale raffigurato indica una banchina cedevole", vero: false, fig: 3, cat: "pericolo", expl: "Falso. Il simbolo indica una cunetta. La banchina cedevole è segnalata da un diverso cartello che raffigura un'auto inclinata che rischia di scivolare fuori dal piano stradale." },
+
+ /* Blocco 12006: Cunetta (comportamento) */ 
+{ id: 69, text: "In presenza del segnale raffigurato è necessario moderare la velocità per evitare danni alle sospensioni", vero: true, fig: 3, cat: "pericolo", expl: "Vero. Attraversare una cunetta a velocità elevata può causare forti sollecitazioni meccaniche al veicolo e la perdita di controllo a causa del sobbalzo delle ruote." }, 
+{ id: 70, text: "In presenza del segnale raffigurato è necessario rallentare solo se provengono veicoli dal senso opposto", vero: false, fig: 3, cat: "pericolo", expl: "Falso. La velocità deve essere moderata in ogni caso per preservare l'integrità del veicolo e garantire la sicurezza, indipendentemente dalla presenza di altri utenti sulla strada." }, 
+
+/* Blocco 12007: Curva pericolosa a destra */ 
+{ id: 71, text: "Il segnale raffigurato preannuncia una curva pericolosa a destra", vero: true, fig: 4, cat: "pericolo", expl: "Vero. Preavvisa un tratto di strada non rettilineo con visibilità limitata verso destra. Richiede di regolare la velocità in base al raggio della curva e alle condizioni meteorologiche." }, 
+{ id: 72, text: "Il segnale raffigurato preannuncia una serie di curve pericolose di cui la prima a destra", vero: false, fig: 4, cat: "pericolo", expl: "Falso. Il segnale raffigurato indica una singola curva pericolosa. Per una serie di curve si utilizza un simbolo con una doppia freccia che indica anche la direzione della prima curva." },
+
+ /* Blocco 12008: Curva pericolosa a destra (comportamento) */
+ { id: 73, text: "In presenza del segnale raffigurato, posto su strada a doppio senso di circolazione e con due sole corsie, si deve circolare il più possibile vicino al margine destro", vero: true, fig: 4, cat: "pericolo", expl: "Vero. Questa norma di comportamento è essenziale nelle curve con visibilità limitata per evitare collisioni frontali con veicoli provenienti dal senso opposto che potrebbero invadere la corsia." }, 
+{ id: 74, text: "Il segnale raffigurato preannuncia un tratto di strada a due corsie e doppio senso di circolazione in cui è consentito sorpassare i motocicli, senza superare la striscia bianca continua", vero: false, fig: 4, cat: "pericolo", expl: "Falso. Nelle curve pericolose su strade a due sole corsie e doppio senso, il sorpasso è sempre vietato, anche se la manovra potrebbe teoricamente compiersi entro la semicarreggiata." }, 
+
+/* Blocco 12009: Curva pericolosa a sinistra */ 
+{ id: 75, text: "La figura rappresenta un segnale di pericolo", vero: true, fig: 5, cat: "pericolo", expl: "Vero. La forma triangolare con bordo rosso e il simbolo nero all'interno sono le caratteristiche distintive dei segnali di pericolo, che avvertono gli utenti di una situazione critica imminente." },
+ { id: 76, text: "La figura rappresenta un segnale di obbligo", vero: false, fig: 5, cat: "pericolo", expl: "Falso. Il segnale di curva pericolosa a sinistra è un segnale di pericolo. I segnali di obbligo sono invece di forma circolare a fondo blu con simboli bianchi." }, 
+
+/* Blocco 12010: Curva pericolosa a sinistra (comportamento) */
+ { id: 77, text: "In presenza del segnale raffigurato, su una strada a doppio senso di circolazione con due sole corsie, si deve circolare il più possibile vicino al margine destro", vero: true, fig: 5, cat: "pericolo", expl: "Vero. La prudenza impone di stringere il margine destro per garantire la sicurezza del traffico opposto, specialmente in tratti non rettilinei dove la visibilità è spesso compromessa." }, 
+{ id: 78, text: "In presenza del segnale raffigurato, su strada a senso unico di circolazione si deve marciare il più possibile vicino al margine destro della carreggiata", vero: false, fig: 5, cat: "pericolo", expl: "Falso. Sulle strade a senso unico non c'è il rischio di scontro frontale, pertanto la manovra può essere affrontata con traiettorie più agevoli, pur restando all'interno della corsia scelta." }, 
+
+/* Blocco 12011: Doppia curva pericolosa, la prima a destra */ 
+{ id: 79, text: "Il segnale raffigurato preannuncia una doppia curva pericolosa, la prima a destra", vero: true, fig: 6, cat: "pericolo", expl: "Vero. Il simbolo indica una successione di curve ravvicinate. La direzione della prima freccia rivolta verso destra specifica l'andamento iniziale del tratto pericoloso segnalato." }, 
+{ id: 80, text: "Il segnale raffigurato preannuncia una deviazione per lavori in corso", vero: false, fig: 6, cat: "pericolo", expl: "Falso. Il segnale indica una doppia curva pericolosa. Per i lavori in corso si utilizza un segnale triangolare a fondo giallo che raffigura un operaio al lavoro." }, 
+
+/* Blocco 12012: Doppia curva pericolosa, la prima a destra (comportamento) */ 
+{ id: 81, text: "Su strada a due sole corsie e a doppio senso di circolazione, in presenza del segnale raffigurato si deve marciare il più possibile vicino al margine destro", vero: true, fig: 6, cat: "pericolo", expl: "Vero. Nelle doppie curve con visibilità ridotta, occupare il margine destro è fondamentale per prevenire incidenti con chi proviene di fronte, che potrebbe sbandare a causa della forza centrifuga." }, 
+{ id: 82, text: "Il segnale raffigurato preannuncia un tratto di strada in cui è consentita l'inversione di marcia", vero: false, fig: 6, cat: "pericolo", expl: "Falso. In presenza di curve pericolose e visibilità limitata, la manovra di inversione del senso di marcia è severamente vietata per l'elevato rischio di provocare collisioni gravi." }, 
+
+/* Blocco 12013: Doppia curva pericolosa, la prima a sinistra */ 
+{ id: 83, text: "Il segnale raffigurato preannuncia una doppia curva pericolosa, la prima a sinistra", vero: true, fig: 7, cat: "pericolo", expl: "Vero. Il segnale avverte di una successione di curve dove la prima svolta è verso sinistra. È necessario moderare la velocità e prepararsi ad affrontare il cambio di direzione." }, 
+{ id: 84, text: "Il segnale raffigurato preannuncia una strettoia", vero: false, fig: 7, cat: "pericolo", expl: "Falso. Il simbolo indica esclusivamente un andamento tortuoso della strada (doppia curva). Le strettoie sono indicate da segnali con linee nere che si restringono verso il centro." }, 
+
+/* Blocco 12014: Doppia curva pericolosa, la prima a sinistra (comportamento) */ 
+{ id: 85, text: "In presenza del segnale raffigurato si deve circolare il più possibile vicino al margine destro della carreggiata, su strada a due sole corsie e a doppio senso di circolazione", vero: true, fig: 7, cat: "pericolo", expl: "Vero. Come per tutte le curve pericolose su strade a doppio senso, mantenersi a destra garantisce la sicurezza necessaria in caso di incrocio con altri veicoli non visibili." }, 
+{ id: 86, text: "In presenza del segnale raffigurato è consentita l'inversione di marcia", vero: false, fig: 7, cat: "pericolo", expl: "Falso. L'inversione di marcia è vietata in corrispondenza e in prossimità delle curve pericolose a causa della mancanza di visibilità sufficiente per compiere la manovra senza pericolo." }, 
+
+/* Blocco 12015: Passaggio a livello con barriere o semibarriere */ 
+{ id: 87, text: "Il segnale raffigurato preannuncia un passaggio a livello con barriere o con semibarriere", vero: true, fig: 8, cat: "pericolo", expl: "Vero. Il simbolo della cancellata indica che l'attraversamento ferroviario è protetto da dispositivi di chiusura fisici. È obbligatorio moderare la velocità e prepararsi all'arresto." }, 
+{ id: 88, text: "Il segnale raffigurato preannuncia l'incrocio con una linea tranviaria", vero: false, fig: 8, cat: "pericolo", expl: "Falso. Il segnale riguarda i passaggi a livello ferroviari. Gli incroci con linee tranviarie sono segnalati da un cartello triangolare che raffigura esplicitamente un tram." }, 
+
+/* Blocco 12016: Passaggio a livello con barriere o semibarriere (comportamento) */ 
+{ id: 89, text: "In presenza del segnale raffigurato è necessario moderare la velocità per essere pronti ad arrestarsi se le barriere sono chiuse", vero: true, fig: 8, cat: "pericolo", expl: "Vero. Avvicinandosi a un passaggio a livello protetto, bisogna essere pronti a fermarsi in sicurezza qualora le segnalazioni luminose rosse o acustiche indichino l'arrivo del treno." },
+ { id: 90, text: "In presenza del segnale raffigurato è consentito sostare in corrispondenza o in prossimità dei passaggi a livelli", vero: false, fig: 8, cat: "pericolo", expl: "Falso. La sosta e la fermata sono sempre vietate in corrispondenza e in prossimità dei binari ferroviari poiché costituirebbero un gravissimo intralcio e pericolo per la circolazione dei treni." }, 
+
+/* Blocco 12017: Passaggio a livello senza barriere */ 
+{ id: 91, text: "Il segnale raffigurato preannuncia un attraversamento ferroviario a livello senza barriere", vero: true, fig: 9, cat: "pericolo", expl: "Vero. Il simbolo della locomotiva a vapore indica un passaggio a livello privo di protezioni fisiche. Richiede la massima allerta visiva e uditiva per verificare l'arrivo di treni." }, 
+{ id: 92, text: "Il segnale raffigurato indica l'incrocio con una linea tranviaria", vero: false, fig: 9, cat: "pericolo", expl: "Falso. Il segnale avverte della presenza di binari ferroviari e non tranviari. La distinzione è importante per le diverse regole di precedenza e comportamento da adottare." },
+
+ /* Blocco 12018: Passaggio a livello senza barriere (comportamento) */ 
+{ id: 93, text: "In presenza del segnale raffigurato è necessario rallentare in relazione alla visibilità della linea ferroviaria", vero: true, fig: 9, cat: "pericolo", expl: "Vero. Trattandosi di un passaggio a livello incustodito, la sicurezza dipende dalla capacità del conducente di osservare i binari. La velocità deve permettere l'arresto immediato." }, 
+{ id: 94, text: "In presenza del segnale raffigurato è necessario rallentare esclusivamente in caso di nebbia", vero: false, fig: 9, cat: "pericolo", expl: "Falso. È obbligatorio rallentare sempre quando ci si approssima a un passaggio a livello senza barriere, indipendentemente dalle condizioni meteo, per garantire un attraversamento sicuro." }, 
+
+/* Blocco 12019: Croce di S. Andrea */ 
+{ id: 95, text: "Il segnale raffigurato indica che la sede ferroviaria ha un solo binario", vero: true, fig: 10, cat: "pericolo", expl: "Vero. La croce di Sant'Andrea singola è posta nelle immediate vicinanze dei binari e specifica che la linea ferroviaria è composta da un unico binario di marcia." }, 
+{ id: 96, text: "Il segnale raffigurato preannuncia una sede ferroviaria con più binari", vero: false, fig: 10, cat: "pericolo", expl: "Falso. La croce singola indica un solo binario. In presenza di due o più binari si utilizza la doppia croce di Sant'Andrea, che presenta due elementi a X sovrapposti." }, 
+
+/* Blocco 12020: Doppia croce di S. Andrea */
+ { id: 97, text: "Il segnale raffigurato impone di arrestarsi entro la striscia di arresto, se è in arrivo il treno", vero: true, fig: 11, cat: "pericolo", expl: "Vero. Posto vicino ai binari, il segnale di doppia croce di Sant'Andrea indica un attraversamento senza barriere con più binari, dove l'arresto è obbligatorio all'arrivo del convoglio." },
+ { id: 98, text: "Il segnale raffigurato è posto, di norma, a 150 metri dai binari", vero: false, fig: 11, cat: "pericolo", expl: "Falso. Questo segnale di localizzazione si trova a pochi metri dai binari. Il preavviso a 150 metri è invece costituito dal segnale triangolare di pericolo con il relativo simbolo." }, 
+
+/* Blocco 12021: Pannelli distanziometrici ai passaggi a livello */ 
+{ id: 99, text: "I pannelli raffigurati sono posti prima di qualsiasi tipo di passaggio a livello", vero: true, fig: 13, cat: "pericolo", expl: "Vero. I pannelli distanziometrici servono a scandire l'avvicinamento ai binari (150, 100 e 50 metri) e vengono installati in tutti i passaggi a livello, con o senza barriere." }, 
+{ id: 100, text: "I pannelli raffigurati si possono trovare solo se il passaggio a livello è con barriere", vero: false, fig: 13, cat: "pericolo", expl: "Falso. La loro funzione di indicare la distanza dai binari è universale; pertanto sono presenti anche nei passaggi a livello sprovvisti di barriere o semibarriere protettive." },
 
 /* Blocco 12022: Attraversamento tranviario */ { id: 101, text: "Il segnale raffigurato preannuncia di moderare la velocità perché poco più avanti si potrebbe incrociare un tram", vero: true, fig: 14, cat: "pericolo", expl: "Questo segnale di pericolo avverte della presenza di un incrocio con binari del tram non regolato da semafori. È fondamentale moderare la velocità per non intralciare il mezzo pubblico che ha spazi di arresto molto lunghi." }, { id: 102, text: "Il segnale raffigurato preannuncia un eventuale transito di filobus", vero: false, fig: 14, cat: "pericolo", expl: "Falso. Il segnale raffigurato si riferisce esclusivamente ai veicoli su rotaia (tram). I filobus, pur essendo mezzi di trasporto pubblico, circolano su pneumatici e non sono soggetti a questa specifica segnalazione di pericolo." }, /* Blocco 12023: Attraversamento tranviario (comportamento) */ { id: 103, text: "In presenza del segnale raffigurato si può sorpassare a destra il tram in marcia se vi è lo spazio necessario", vero: true, fig: 14, cat: "pericolo", expl: "Vero. Il Codice della Strada permette il sorpasso del tram sulla destra se la larghezza della carreggiata lo consente. Bisogna comunque prestare attenzione ai pedoni che potrebbero scendere o salire dal mezzo." }, { id: 104, text: "In presenza del segnale raffigurato si ha l'obbligo di dare la precedenza ai filobus", vero: false, fig: 14, cat: "pericolo", expl: "Falso. L'obbligo di precedenza sancito dal segnale riguarda i tram che circolano sui binari. I filobus devono rispettare le normali regole di precedenza valide per tutti i veicoli che circolano su gomma nella carreggiata." }, /* Blocco 12024: Attraversamento pedonale */ { id: 105, text: "Il segnale raffigurato preannuncia un attraversamento pedonale", vero: true, fig: 15, cat: "pericolo", expl: "Vero. Il segnale avverte che a 150 metri si trova un attraversamento pedonale. Il conducente deve rallentare ed essere pronto a fermarsi per cedere la precedenza ai pedoni che stanno attraversando le strisce." }, { id: 106, text: "Il segnale raffigurato preannuncia un luogo frequentato da bambini", vero: false, fig: 15, cat: "pericolo", expl: "Falso. Il segnale raffigurato indica specificamente un attraversamento pedonale. Il pericolo relativo ai bambini è segnalato da un cartello diverso che raffigura due scolari che corrono o camminano affiancati." }, /* Blocco 12025: Attraversamento pedonale (comportamento) */ { id: 107, text: "In presenza del segnale raffigurato non è consentito sorpassare i veicoli che rallentano per far attraversare i pedoni", vero: true, fig: 15, cat: "pericolo", expl: "Vero. È vietato sorpassare un veicolo che ha rallentato o si è fermato per far passare i pedoni. Tale manovra è pericolosissima perché il veicolo sorpassante colpirebbe il pedone non visibile durante la marcia." }, { id: 108, text: "In presenza del segnale raffigurato è obbligatorio suonare il clacson se vi sono pedoni che attraversano sulle strisce pedonali", vero: false, fig: 15, cat: "pericolo", expl: "Falso. Non è obbligatorio né opportuno suonare il clacson contro i pedoni che attraversano regolarmente. Al contrario, bisogna arrestarsi dolcemente per lasciarli passare in sicurezza senza spaventarli con rumori molesti." }, /* Blocco 12026: Attraversamento ciclabile */ { id: 109, text: "Il segnale raffigurato preannuncia un attraversamento ciclabile", vero: true, fig: 16, cat: "pericolo", expl: "Vero. Preavvisa un punto in cui la carreggiata è attraversata da una pista ciclabile segnalata da strisce bianche trasversali a terra. Il conducente deve moderare la velocità e prepararsi a dare la precedenza." }, { id: 110, text: "Il segnale raffigurato è posto in corrispondenza di un attraversamento ciclabile", vero: false, fig: 16, cat: "pericolo", expl: "Falso. Trattandosi di un segnale di pericolo triangolare, è posto di norma 150 metri PRIMA dell'attraversamento ciclabile. Il segnale che localizza l'attraversamento stesso è di forma quadrata e colore blu." }, /* Blocco 12027: Attraversamento ciclabile (comportamento) */ { id: 111, text: "In presenza del segnale raffigurato bisogna comportarsi in modo da non costituire pericolo o intralcio per i ciclisti", vero: true, fig: 16, cat: "pericolo", expl: "Vero. È dovere del conducente adeguare la guida alla possibile presenza di ciclisti che attraversano la strada, evitando manovre brusche e rallentando per garantire la massima sicurezza agli utenti deboli." }, { id: 112, text: "In presenza del segnale raffigurato si deve suonare il clacson se vi sono ciclisti che stanno attraversando sulle strisce", vero: false, fig: 16, cat: "pericolo", expl: "Falso. L'uso dell'avvisatore acustico non è richiesto per sollecitare i ciclisti durante l'attraversamento. Bisogna invece arrestarsi e attendere che abbiano liberato la carreggiata senza creare ansia o confusione." }, /* Blocco 12028: Discesa pericolosa */ { id: 113, text: "Il segnale raffigurato è posto prima di una discesa pericolosa", vero: true, fig: 17, cat: "pericolo", expl: "Vero. Il segnale preavvisa una discesa ripida indicandone la pendenza in percentuale. Questo tratto di strada aumenta lo spazio necessario per la frenata e richiede un uso sapiente delle marce basse." }, { id: 114, text: "Il segnale raffigurato preannuncia una salita da percorrere con marcia adeguatamente bassa", vero: false, fig: 17, cat: "pericolo", expl: "Falso. Il segnale raffigurato indica chiaramente una discesa, non una salita. Confondere i due segnali è un errore grave poiché le tecniche di guida e l'uso del freno motore cambiano radicalmente." }, /* Blocco 12029: Discesa pericolosa (comportamento) */ { id: 115, text: "In presenza del segnale raffigurato, l'inserimento di una marcia bassa consente di sfruttare adeguatamente l'azione frenante del motore", vero: true, fig: 17, cat: "pericolo", expl: "Vero. In discesa è fondamentale usare il freno motore scalando le marce. Questo evita che i freni a disco o a tamburo si surriscaldino troppo, mantenendo l'impianto frenante efficiente per tutta la durata del tratto." }, { id: 116, text: "In presenza del segnale raffigurato si deve rallentare usando continuamente i freni per non danneggiare il cambio di velocità", vero: false, fig: 17, cat: "pericolo", expl: "Falso. Usare i freni continuamente in una discesa ripida porta al surriscaldamento e alla perdita di efficacia dei freni stessi. Bisogna invece affidarsi al freno motore e usare i freni a pedale solo a tratti." }, /* Blocco 12030: Salita ripida */ { id: 117, text: "Il segnale raffigurato è posto prima di una salita ripida", vero: true, fig: 18, cat: "pericolo", expl: "Vero. Il segnale indica l'inizio di un tratto stradale con pendenza elevata verso l'alto. Richiede l'inserimento di una marcia sufficientemente bassa per avere la potenza necessaria a superare il dislivello senza sforzo." }, { id: 118, text: "Il segnale raffigurato preannuncia un tratto di strada da percorrere con il pedale della frizione abbassato", vero: false, fig: 18, cat: "pericolo", expl: "Falso. Percorrere una salita o qualsiasi tratto di strada con la frizione abbassata è errato e pericoloso, poiché si toglie trazione al veicolo e non si ha più il controllo della marcia del motore." }, /* Blocco 12031: Strettoia simmetrica */ { id: 119, text: "Il segnale raffigurato preannuncia un restringimento della carreggiata", vero: true, fig: 19, cat: "pericolo", expl: "Vero. Indica che la strada subisce una riduzione della larghezza su entrambi i lati. È necessario moderare la velocità e fare attenzione ai veicoli provenienti dal senso opposto per evitare collisioni laterali." }, { id: 120, text: "Il segnale raffigurato preannuncia un senso unico alternato con l'obbligo di dare la precedenza ai veicoli provenienti dall'altro senso", vero: false, fig: 19, cat: "pericolo", expl: "Falso. Il segnale di pericolo indica solo la strettoia simmetrica. L'obbligo di dare precedenza nei sensi unici alternati è regolato da segnali di prescrizione circolari (rosso e bianco) e non da questo." }, /* Blocco 12032: Strettoia a sinistra */ { id: 121, text: "Il segnale raffigurato preannuncia un restringimento della carreggiata", vero: true, fig: 20, cat: "pericolo", expl: "Vero. Avverte che la strada si restringe sul lato sinistro. Bisogna prevedere che i veicoli che marciano a sinistra debbano spostarsi verso il centro della carreggiata per superare il restringimento." }, { id: 122, text: "Il segnale raffigurato è un segnale di prescrizione", vero: false, fig: 20, cat: "pericolo", expl: "Falso. Questo è un segnale di pericolo triangolare. I segnali di prescrizione comprendono i segnali di obbligo, di divieto e di precedenza, che hanno forme geometriche e significati normativi differenti." }, /* Blocco 12033: Strettoia a destra */ { id: 123, text: "Il segnale raffigurato preannuncia una strettoia sulla destra della carreggiata", vero: true, fig: 21, cat: "pericolo", expl: "Vero. Indica che la larghezza della strada si riduce sul lato destro, solitamente a causa di muretti o ostacoli fissi. Richiede prudenza durante l'incrocio con altri veicoli provenienti di fronte." }, { id: 124, text: "Il segnale raffigurato indica la fine del doppio senso di circolazione", vero: false, fig: 21, cat: "pericolo", expl: "Falso. Il segnale riguarda esclusivamente la larghezza della carreggiata e non il regime di circolazione. La fine del doppio senso è segnalata da un cartello quadrato che indica l'inizio del senso unico." }, /* Blocco 12037: Bambini */ { id: 125, text: "Il segnale raffigurato può preannunciare la presenza di una scuola frequentata da bambini nelle vicinanze", vero: true, fig: 25, cat: "pericolo", expl: "Vero. Questo segnale avverte della possibile presenza di bambini a causa della vicinanza di scuole, giardini o parchi giochi. Impone una guida molto attenta e una velocità molto moderata." }, 
 { id: 126, text: "Il segnale raffigurato vieta il transito ai bambini non accompagnati", vero: false, fig: 25, cat: "pericolo", expl: "Falso. Essendo un segnale di pericolo, avverte i conducenti di un rischio potenziale ma non pone alcun divieto né ai veicoli né ai pedoni. Non può impedire la libera circolazione dei bambini." }, /* Blocco 12038: Bambini - comportamento */ { id: 127, text: "In presenza del segnale raffigurato occorre prestare particolare attenzione per la possibile presenza di bambini", vero: true, fig: 25, cat: "pericolo", expl: "Vero. La vista del segnale deve indurre il conducente a un'attenzione vigile, poiché i bambini sono utenti imprevedibili che potrebbero sbucare improvvisamente in carreggiata senza guardare il traffico." }, { id: 128, text: "In presenza del segnale raffigurato è necessario fare attenzione ai bambini sulla carreggiata e non a quelli sul marciapiede", vero: false, fig: 25, cat: "pericolo", expl: "Falso. Bisogna prestare attenzione a tutti i bambini presenti, anche quelli sul marciapiede, poiché la loro natura vivace potrebbe portarli a scendere improvvisamente in strada per rincorrersi o giocare." }, /* Blocco 12034: Ponte mobile */ { id: 129, text: "Il segnale raffigurato preannuncia un ponte mobile", vero: true, fig: 22, cat: "pericolo", expl: "Vero. Preavvisa la presenza di una struttura che può aprirsi per consentire il passaggio di imbarcazioni. Richiede di arrestarsi se sono attive le luci rosse lampeggianti o se le barriere si chiudono." }, { id: 130, text: "Il segnale raffigurato preannuncia un'area portuale", vero: false, fig: 22, cat: "pericolo", expl: "Falso. Sebbene possa trovarsi vicino a un porto, il segnale indica specificamente il ponte mobile. Le aree portuali sono indicate da segnali di indicazione rettangolari di colore blu o bianco." }, /* Blocco 12053: Banchina cedevole */ { id: 131, text: "Il segnale raffigurato preannuncia un tratto di strada con banchina cedevole", vero: true, fig: 23, cat: "pericolo", expl: "Vero. Avverte che il margine destro della strada non è solido e potrebbe franare se percorso da veicoli pesanti. Bisogna evitare di accostarsi troppo al bordo esterno della carreggiata." }, { id: 132, text: "Il segnale raffigurato deve essere integrato con il segnale di limite di velocità", vero: false, fig: 23, cat: "pericolo", expl: "Falso. Non esiste l'obbligo di integrare questo segnale con un limite di velocità, anche se l'autorità proprietaria della strada può farlo se lo ritiene opportuno per la sicurezza stradale." }, /* Blocco 12035: Strada sdrucciolevole */ { id: 133, text: "Il segnale raffigurato preannuncia un tratto di strada che può diventare pericoloso in particolari condizioni climatiche specificate nei pannelli integrativi", vero: true, fig: 24, cat: "pericolo", expl: "Vero. Indica che l'aderenza del fondo stradale può ridursi drasticamente per neve, ghiaccio o pioggia, come dettagliato dai pannelli bianchi posti solitamente sotto il triangolo di pericolo." }, { id: 134, text: "Il segnale raffigurato preannuncia una strettoia", vero: false, fig: 24, cat: "pericolo", expl: "Falso. Il simbolo rappresenta un veicolo che sbanda, indicando scarsa aderenza. Le strettoie hanno un simbolo completamente diverso con linee nere verticali che si avvicinano tra loro." }, /* Blocco 12036: Strada sdrucciolevole - comportamento */ { id: 135, text: "In presenza del segnale raffigurato è necessario moderare la velocità ed evitare brusche frenate in caso di pioggia", vero: true, fig: 24, cat: "pericolo", expl: "Vero. Con l'asfalto viscido, le manovre brusche sono la causa principale di sbandate e testacoda. Bisogna agire sui comandi (sterzo e freni) con estrema dolcezza e molta gradualità." }, { id: 136, text: "In presenza del segnale raffigurato è necessario tenere presente che la distanza di frenatura diminuisce in caso di pioggia", vero: false, fig: 24, cat: "pericolo", expl: "Falso. Al contrario, quando piove l'aderenza diminuisce e la distanza necessaria per fermare il veicolo aumenta considerevolmente. Per questo bisogna aumentare la distanza di sicurezza." }, /* Blocco 12039: Animali domestici vaganti */ { id: 137, text: "Il segnale raffigurato preannuncia un tratto di strada con probabile attraversamento di animali domestici", vero: true, fig: 26, cat: "pericolo", expl: "Vero. Segnala zone dove mandrie o greggi potrebbero occupare la carreggiata. Il conducente deve essere pronto a rallentare o fermarsi senza spaventare gli animali con suoni molesti." }, { id: 138, text: "In presenza del segnale raffigurato è obbligatorio usare ripetutamente l'avvisatore acustico per allontanare gli animali", vero: false, fig: 26, cat: "pericolo", expl: "Falso. L'uso del clacson può agitare gli animali rendendoli imprevedibili e pericolosi. Bisogna attendere con pazienza che il personale addetto li sposti o procedere a passo d'uomo." }, /* Blocco 12040: Animali selvatici vaganti */ { id: 139, text: "Il segnale raffigurato preannuncia il probabile attraversamento di animali selvatici", vero: true, fig: 27, cat: "pericolo", expl: "Vero. Frequente in zone boscose o parchi nazionali, avverte del rischio di collisione con cervi, cinghiali o daini. Richiede una velocità moderata, specialmente nelle ore notturne." }, { id: 140, text: "In presenza del segnale raffigurato è obbligatorio usare ripetutamente l'avvisatore acustico per allontanare gli animali", vero: false, fig: 27, cat: "pericolo", expl: "Falso. Come per gli animali domestici, il rumore non serve ad allontanarli in sicurezza. Bisogna invece essere pronti alla frenata d'emergenza in caso di improvvisa invasione della carreggiata." }, /* Blocco 12041: Doppio senso di circolazione */ { id: 141, text: "Il segnale raffigurato preannuncia che una carreggiata a senso unico, diventa a doppio senso di circolazione", vero: true, fig: 28, cat: "pericolo", expl: "Vero. Si trova al termine di una strada a senso unico. Il conducente deve ricordarsi che tra poco inizierà ad incrociare veicoli che marciano in senso opposto sulla stessa strada." }, { id: 142, text: "Il segnale raffigurato preannuncia che il traffico si svolge su due carreggiate separate", vero: false, fig: 28, cat: "pericolo", expl: "Falso. Il segnale avverte che l'unica carreggiata presente smette di essere a senso unico e torna ad essere a doppio senso. Non implica affatto la creazione fisica di due carreggiate." }, /* Blocco 12051: Rotatoria */ { id: 143, text: "Il segnale raffigurato preannuncia un incrocio di due o più strade extraurbane regolato con circolazione rotatoria", vero: true, fig: 29, cat: "pericolo", expl: "Vero. Il segnale di pericolo rotonda serve ad avvisare il conducente di moderare la velocità prima di immettersi nell'anello, dove solitamente vige l'obbligo di cedere la precedenza." }, { id: 144, text: "Il segnale raffigurato vieta la svolta a destra al primo incrocio", vero: false, fig: 29, cat: "pericolo", expl: "Falso. È un segnale di pericolo e non di divieto. Informa della presenza di una rotonda ma non impedisce affatto di imboccare la prima uscita a destra seguendo la corretta canalizzazione." }, /* Blocco 12042: Sbocco su molo o argine */ { id: 145, text: "Il segnale raffigurato preannuncia lo sbocco della strada su una banchina portuale", vero: true, fig: 30, cat: "pericolo", expl: "Vero. Segnala il rischio di caduta in acqua al termine della via. Bisogna guidare con prudenza estrema, specialmente di notte o se si devono compiere manovre di retromarcia." }, { id: 146, text: "Il segnale raffigurato preannuncia un viadotto in costruzione", vero: false, fig: 30, cat: "pericolo", expl: "Falso. Il simbolo indica il pericolo di caduta in acqua (molo o argine). Un viadotto in costruzione sarebbe segnalato da cartelli gialli temporanei di cantiere con scritte specifiche." }, /* Blocco 12043: Materiale instabile sulla strada */ { id: 147, text: "Il segnale raffigurato preannuncia un tratto di strada sul quale l'aderenza del veicolo può diminuire", vero: true, fig: 31, cat: "pericolo", expl: "Vero. La ghiaia o il pietrisco sulla carreggiata riducono la stabilità. Oltre al rischio di scivolamento, il pietrisco può essere scagliato dalle ruote contro altri utenti della strada." }, { id: 148, text: "Il segnale raffigurato consiglia di accelerare per aumentare l'aderenza del veicolo sull'asfalto", vero: false, fig: 31, cat: "pericolo", expl: "Falso. Accelerare su materiale instabile è pericolosissimo poiché favorisce lo slittamento delle ruote motrici. Bisogna invece mantenere una velocità costante e moderata aumentando la distanza di sicurezza." }, /* Blocco 12044: Caduta massi - da sinistra */ { id: 149, text: "Il segnale raffigurato preannuncia il pericolo di caduta di massi", vero: true, fig: 32, cat: "pericolo", expl: "Vero. Indica una zona di montagna o collina con pareti rocciose instabili. È opportuno evitare lunghe soste nel tratto pericoloso e moderare la velocità per schivare pietre cadute." }, { id: 150, text: "Il segnale raffigurato preannuncia un tratto di strada con cantieri stradali", vero: false, fig: 32, cat: "pericolo", expl: "Falso. Il segnale di caduta massi è permanente e riguarda un rischio naturale geologico. I cantieri sono segnalati da cartelli mobili a fondo giallo con l'omino che lavora." },
@@ -361,7 +522,7 @@
       /* Blocco 23037: Immissione nel flusso - punti (Pag. 249) */ { id: 999, text: "Il mancato rispetto delle norme prescritte per immettersi nel flusso della circolazione comporta, tra l’altro, la perdita di punti dalla patente", vero: true, fig: null, cat: "norme", expl: "Vero. La pericolosità delle immissioni scorrette è sanzionata dal sistema a punti per scoraggiare comportamenti che causano spesso collisioni laterali e tamponamenti evitabili." }, { id: 1000, text: "In caso di fermata sul margine destro della carreggiata senza segnalare con sufficiente anticipo, è disposta la sottrazione di 4 punti dalla patente", vero: false, fig: null, cat: "norme", expl: "Falso. Sebbene la mancata segnalazione sia un'infrazione punibile con multa, l'entità della decurtazione dei punti varia in base alla specifica gravità dell'azione e del pericolo creato." },
     ];
 
-    // CONFIGURAZIONE CATEGORIE AGGIORNATA (Rimosso Documenti e Sicurezza)
+    /* CONFIGURAZIONE CATEGORIE AGGIORNATA */
     const chapters = [
         { id: 'veicoli', title: 'Definizioni Veicoli' },
         { id: 'pericolo', title: 'Segnali di Pericolo' },
@@ -378,25 +539,94 @@
         totalExams: 0, passedExams: 0, history: [], errorsBank: [] 
     };
 
+    let deferredPrompt;
+    const installCard = document.getElementById('install-card-section');
+    const infoModal = document.getElementById('install-instruction-modal');
+    const isIos = /iPhone|iPad|iPod/.test(navigator.userAgent) && !window.MSStream;
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+
+    if (isStandalone) { if(installCard) installCard.style.display = 'none'; }
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+    });
+
+    function triggerInstall() {
+        const modalTitle = document.getElementById('modal-title');
+        const modalText = document.getElementById('modal-text');
+        if (isIos) {
+            modalTitle.innerText = "Installazione su iPhone";
+            modalText.innerHTML = `1. Tocca <b>Condividi</b>.<br>2. Seleziona <b>"Aggiungi a Home"</b>.`;
+            infoModal.style.display = 'flex';
+        } else if (deferredPrompt) {
+            deferredPrompt.prompt();
+            deferredPrompt.userChoice.then((res) => { if (res.outcome === 'accepted') installCard.style.display = 'none'; });
+        } else {
+            modalTitle.innerText = "Installazione Manuale";
+            modalText.innerHTML = `Usa le impostazioni del browser per aggiungere l'app alla schermata Home.`;
+            infoModal.style.display = 'flex';
+        }
+    }
+
+    const hr = new Date().getHours();
+    let greet = hr < 12 ? "Buongiorno" : hr < 18 ? "Buon pomeriggio" : "Buonasera";
+    document.getElementById('welcome-msg').innerText = greet;
+
     function goHome() {
-        clearInterval(timerInterval);
+        stopTimer();
         document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
         document.getElementById('view-home').classList.add('active');
         updateDashboard();
+    }
+
+    function resetData() {
+        if(confirm("Cancellare tutto lo storico?")) {
+            localStorage.removeItem('patenteMasterApp');
+            location.reload();
+        }
+    }
+
+    function showView(id) {
+        document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
     }
 
     function updateDashboard() {
         document.getElementById('stat-total').innerText = userStats.totalExams;
         document.getElementById('stat-passed').innerText = userStats.passedExams;
         document.getElementById('err-count-badge').innerText = userStats.errorsBank.length;
-        
+        const revCard = document.getElementById('card-review');
+        if (userStats.errorsBank.length === 0) { revCard.classList.add('disabled'); } 
+        else { revCard.classList.remove('disabled'); }
         const historyContainer = document.getElementById('history-dots');
         historyContainer.innerHTML = "";
         for(let i=0; i<5; i++) {
             const dot = document.createElement('div');
-            dot.className = "dot " + (userStats.history[i] || "");
+            dot.className = "dot";
+            if (userStats.history[i]) dot.classList.add(userStats.history[i]);
             historyContainer.appendChild(dot);
         }
+    }
+
+    function startTimer() {
+        const display = document.getElementById('timer-display');
+        display.style.display = "block";
+        let seconds = 30 * 60;
+        clearInterval(timerInterval);
+        timerInterval = setInterval(() => {
+            seconds--;
+            updateTimerText(seconds);
+            if(seconds <= 60) display.classList.add('urgent');
+            if(seconds <= 0) { stopTimer(); endSession(); }
+        }, 1000);
+    }
+
+    function stopTimer() { clearInterval(timerInterval); document.getElementById('timer-display').style.display = "none"; }
+    function updateTimerText(sec) {
+        const m = Math.floor(sec / 60).toString().padStart(2, '0');
+        const s = (sec % 60).toString().padStart(2, '0');
+        document.getElementById('timer-display').innerText = `${m}:${s}`;
     }
 
     function goToChapters() {
@@ -406,7 +636,7 @@
             const count = db.filter(q => q.cat === chap.id).length;
             const div = document.createElement('div');
             div.className = 'chapter-card';
-            div.innerHTML = `<span>${chap.title}</span><span style="font-size:12px; color:#6B7280;">${count}</span>`;
+            div.innerHTML = `<span style="font-weight:600; font-size:14px;">${chap.title}</span><span style="font-size:12px;">${count}</span>`;
             div.onclick = () => startSession('studio', chap.id, chap.title);
             list.appendChild(div);
         });
@@ -414,136 +644,103 @@
     }
 
     function startSession(mode, catId = null, catTitle = "") {
-        session = { mode, index: 0, score: 0, errors: 0, queue: [] };
+        session.mode = mode; session.index = 0; session.score = 0; session.errors = 0; session.queue = [];
         const lbl = document.getElementById('quiz-mode-label');
-        
         if (mode === 'sim') {
-            session.queue = [...db].sort(() => 0.5 - Math.random()).slice(0, 30);
+            session.queue = JSON.parse(JSON.stringify([...db].sort(() => 0.5 - Math.random()).slice(0, 30)));
             lbl.innerText = "ESAME";
             startTimer();
         } else if (mode === 'studio') {
-            session.queue = db.filter(q => q.cat === catId).sort(() => 0.5 - Math.random());
+            session.queue = JSON.parse(JSON.stringify(db.filter(q => q.cat === catId).sort(() => 0.5 - Math.random())));
             lbl.innerText = catTitle;
+            stopTimer();
         } else if (mode === 'review') {
-            session.queue = db.filter(q => userStats.errorsBank.includes(q.id));
+            session.queue = JSON.parse(JSON.stringify(db.filter(q => userStats.errorsBank.includes(q.id))));
             lbl.innerText = "RIPASSO";
+            stopTimer();
         }
+        showView('view-quiz'); loadQuestion();
+    }
 
-        if (session.queue.length === 0) { alert("Nessun quiz trovato!"); return; }
-        showView('view-quiz');
-        loadQuestion();
+    function setupUI(isAnswered) {
+        const btnPrev = document.getElementById('btn-prev');
+        const btnNext = document.getElementById('btn-next');
+        const explBox = document.getElementById('expl-box');
+        const ansArea = document.getElementById('ans-area');
+        document.querySelectorAll('.ans-btn').forEach(b => b.className = "ans-btn");
+        btnPrev.style.display = session.index > 0 ? 'block' : 'none';
+        if (isAnswered) {
+            ansArea.style.pointerEvents = 'none';
+            btnNext.style.display = 'block';
+            const q = session.queue[session.index];
+            const isCorrect = (q.userAnswer === q.vero);
+            document.getElementById(q.userAnswer ? 'btn-true' : 'btn-false').classList.add(isCorrect ? 'selected-true' : 'selected-false');
+            document.getElementById(q.userAnswer ? 'btn-false' : 'btn-true').classList.add('dimmed');
+            if (session.mode !== 'sim') {
+                document.getElementById('expl-text').innerHTML = (isCorrect ? "Esatto! " : "Errore. ") + (q.expl || "");
+                explBox.style.display = 'block';
+            }
+        } else {
+            ansArea.style.pointerEvents = 'auto';
+            explBox.style.display = 'none';
+            btnNext.style.display = 'none';
+        }
     }
 
     function loadQuestion() {
         const q = session.queue[session.index];
-        const answered = q.hasOwnProperty('userAnswer');
-        
-        document.getElementById('q-text').innerText = q.text;
+        setupUI(q.hasOwnProperty('userAnswer'));
         document.getElementById('quiz-counter').innerText = `${session.index + 1} / ${session.queue.length}`;
-        document.getElementById('progress').style.width = `${(session.index / session.queue.length) * 100}%`;
-        
+        document.getElementById('progress').style.width = `${((session.index) / session.queue.length) * 100}%`;
+        document.getElementById('q-text').innerText = q.text;
         const imgBox = document.getElementById('img-box');
         if (q.fig) {
             imgBox.style.display = 'flex';
             imgBox.innerHTML = `<img src="img/fig_${q.fig}.jpg">`;
-        } else {
-            imgBox.style.display = 'none';
-        }
-
-        setupButtons(answered);
+        } else { imgBox.style.display = 'none'; }
     }
 
-    function setupButtons(answered) {
-        const btnT = document.getElementById('btn-true');
-        const btnF = document.getElementById('btn-false');
-        const btnNext = document.getElementById('btn-next');
-        const explBox = document.getElementById('expl-box');
-        
-        btnT.className = "ans-btn"; btnF.className = "ans-btn";
-        
-        if (answered) {
-            const q = session.queue[session.index];
-            const correct = q.userAnswer === q.vero;
-            if (q.userAnswer) btnT.classList.add(correct ? 'selected-true' : 'selected-false');
-            else btnF.classList.add(correct ? 'selected-true' : 'selected-false');
-            
-            if (session.mode !== 'sim') {
-                explBox.style.display = 'block';
-                document.getElementById('expl-text').innerText = q.expl || "Nessuna spiegazione disponibile.";
-            }
-            btnNext.style.display = 'block';
-            document.getElementById('ans-area').style.pointerEvents = 'none';
-        } else {
-            explBox.style.display = 'none';
-            btnNext.style.display = 'none';
-            document.getElementById('ans-area').style.pointerEvents = 'auto';
-        }
-    }
-
-    function submitAnswer(val) {
+    function submitAnswer(userVal) {
         const q = session.queue[session.index];
-        q.userAnswer = val;
-        if (val !== q.vero) {
+        q.userAnswer = userVal;
+        if (userVal === q.vero) {
+            session.score++;
+            if (session.mode === 'review') userStats.errorsBank = userStats.errorsBank.filter(id => id !== q.id);
+        } else {
             session.errors++;
             if (!userStats.errorsBank.includes(q.id)) userStats.errorsBank.push(q.id);
-        } else {
-            session.score++;
-        }
-        
-        if (session.mode === 'sim') {
-            setTimeout(nextQuestion, 200);
-        } else {
-            setupButtons(true);
         }
         localStorage.setItem('patenteMasterApp', JSON.stringify(userStats));
+        if (session.mode === 'sim') setTimeout(nextQuestion, 200);
+        else setupUI(true);
     }
 
-    function nextQuestion() {
-        session.index++;
-        if (session.index < session.queue.length) loadQuestion();
-        else endSession();
+    function prevQuestion() { if (session.index > 0) { session.index--; loadQuestion(); } }
+    function nextQuestion() { 
+        session.index++; 
+        if (session.index < session.queue.length) loadQuestion(); 
+        else endSession(); 
     }
 
     function endSession() {
-        clearInterval(timerInterval);
-        const passed = session.errors <= 3;
+        stopTimer();
         if (session.mode === 'sim') {
             userStats.totalExams++;
+            const passed = session.errors <= 3;
             if(passed) userStats.passedExams++;
             userStats.history.unshift(passed ? 'pass' : 'fail');
             if(userStats.history.length > 5) userStats.history.pop();
             localStorage.setItem('patenteMasterApp', JSON.stringify(userStats));
+            document.getElementById('res-score-val').innerText = session.errors;
+            document.getElementById('res-msg').innerText = passed ? "IDONEO" : "NON IDONEO";
+            document.getElementById('res-sub').innerText = passed ? "Sei pronto!" : "Riprova, massimo 3 errori.";
+        } else {
+            document.getElementById('res-score-val').innerText = session.score;
+            document.getElementById('res-msg').innerText = "Sessione Terminata";
+            document.getElementById('res-sub').innerText = `Completati ${session.index} quiz.`;
         }
-
-        document.getElementById('res-score-val').innerText = session.mode === 'sim' ? session.errors : session.score;
-        document.getElementById('res-score-label').innerText = session.mode === 'sim' ? "Errori" : "Corrette";
-        document.getElementById('res-msg').innerText = session.mode === 'sim' ? (passed ? "IDONEO" : "NON IDONEO") : "Fine Studio";
         showView('view-result');
     }
-
-    function startTimer() {
-        let sec = 1800;
-        document.getElementById('timer-display').style.display = 'block';
-        timerInterval = setInterval(() => {
-            sec--;
-            let m = Math.floor(sec/60), s = sec%60;
-            document.getElementById('timer-display').innerText = `${m}:${s < 10 ? '0'+s : s}`;
-            if (sec <= 0) endSession();
-        }, 1000);
-    }
-
-    function showView(id) {
-        document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
-        document.getElementById(id).classList.add('active');
-    }
-
-    function resetData() {
-        if(confirm("Vuoi azzerare i progressi?")) {
-            localStorage.removeItem('patenteMasterApp');
-            location.reload();
-        }
-    }
-
     updateDashboard();
 </script>
 </body>
