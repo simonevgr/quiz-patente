@@ -1,4 +1,4 @@
-const CACHE_NAME = 'patente-v2';
+const CACHE_NAME = 'patente-v3';
 const ASSETS = [
   './',
   './index.html',
